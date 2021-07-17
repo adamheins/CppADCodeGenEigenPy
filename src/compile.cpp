@@ -1,4 +1,4 @@
-#include <CppADCodeGenEigenPy/ADModel.h>
+#include "CppADCodeGenEigenPy/ADModel.h"
 
 
 struct MyADModel : ADModel<double> {
