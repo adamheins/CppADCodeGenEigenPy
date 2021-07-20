@@ -1,7 +1,8 @@
 CCPP=g++
 BIN_DIR=bin
+LIB_DIR=lib
 
-bin/evaluate_model: autogen/libmy_model.so
+evaluator: $(LIB_DIR)/libmy_model.so
 	@mkdir -p $(BIN_DIR)
 	$(CCPP) -I/usr/local/include/eigen3 -Iinclude -std=c++11 src/evaluate.cpp -ldl -o $(BIN_DIR)/evaluate_model
 
@@ -16,7 +17,7 @@ clean:
 	@rm -rf $(BIN_DIR)
 
 bindings:
-	$(CCPP) -O3 -Wall -shared -I/usr/local/include/eigen3 -Iinclude -Ideps/pybind11/include $(shell python3.7-config --includes) -std=c++11 -fPIC src/bindings.cpp -o lib/example$(shell python3.7-config --extension-suffix)
+	$(CCPP) -O3 -Wall -shared -I/usr/local/include/eigen3 -Iinclude -Ideps/pybind11/include $(shell python3.7-config --includes) -std=c++11 -fPIC src/bindings.cpp -ldl -o $(LIB_DIR)/example$(shell python3.7-config --extension-suffix)
 
 
-.PHONY: clean bindings model compiler
+.PHONY: clean bindings model compiler evaluator
