@@ -1,6 +1,8 @@
 #include <Eigen/Eigen>
 #include <cppad/cg.hpp>
 #include <cppad/example/cppad_eigen.hpp>
+#include <iostream>
+#include <typeinfo>
 
 template <typename Scalar>
 class ADFunction {
@@ -23,12 +25,15 @@ class ADFunction {
     }
 
     Vector evaluate(const Eigen::Ref<const Vector> x) {
-        return model->ForwardZero(Vector(x));
-        // return model->ForwardZero(static_cast<const Vector>(x));
+        // We need to explicitly tell the compiler what the template parameter
+        // is (Vector), since otherwise it will deduce it as Eigen::Ref, which
+        // won't work. The syntax for doing so with methods is somewhat odd,
+        // see <https://stackoverflow.com/a/3505738/5145874>.
+        return model->template ForwardZero<Vector>(x);
     }
 
-    Matrix jacobian(const Eigen::Ref<const Vector>& x) {
-        Vector J_vec = model->Jacobian(static_cast<Vector>(x));
+    Matrix jacobian(const Eigen::Ref<const Vector> x) {
+        Vector J_vec = model->template Jacobian<Vector>(x);
         Eigen::Map<Matrix> J(J_vec.data(), model->Range(), model->Domain());
         assert(J.allFinite());
         return J;
