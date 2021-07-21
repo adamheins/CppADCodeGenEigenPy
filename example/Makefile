@@ -2,23 +2,42 @@ CCPP=g++
 SRC_DIR=src
 BIN_DIR=bin
 LIB_DIR=lib
+COMPILER_BIN=$(BIN_DIR)/compile_model
+COMPILER_SRC=$(SRC_DIR)/compile_model.cpp
+MODEL_NAME=my_model
+MODEL_LIB=$(LIB_DIR)/lib$(MODEL_NAME).so
+EVALUATOR_SRC=$(SRC_DIR)/evaluate_model.cpp
+EVALUATOR_BIN=$(BIN_DIR)/evaluate_model
+
 INCLUDE_DIRS=-I/usr/local/include/eigen3 -I../include -Iinclude
 
+.PHONY: evaluate
+evaluate: $(EVALUATOR_BIN)
+	./$(EVALUATOR_BIN)
+
 # evaluate the model
-evaluator: $(LIB_DIR)/libmy_model.so
+.PHONY: evaluator
+evaluator: $(EVALUATOR_BIN)
+
+$(EVALUATOR_BIN): $(MODEL_LIB) $(EVALUATOR_SRC)
 	@mkdir -p $(BIN_DIR)
-	$(CCPP) $(INCLUDE_DIRS) -std=c++11 $(SRC_DIR)/evaluate_model.cpp -ldl -o $(BIN_DIR)/evaluate_model
+	$(CCPP) $(INCLUDE_DIRS) -std=c++11 $(EVALUATOR_SRC) -ldl -o $(EVALUATOR_BIN)
 
 # compile the model
-model: $(BIN_DIR)/compile_model
-	./$(BIN_DIR)/compile_model
+.PHONY: model
+model: $(MODEL_LIB)
 
-# make the model comiler
-compiler:
+$(MODEL_LIB): $(COMPILER_BIN)
+	./$(COMPILER_BIN)
+
+# make the model compiler
+.PHONY: compiler
+compiler: $(COMPILER_BIN)
+
+$(COMPILER_BIN): $(COMPILER_SRC)
 	@mkdir -p $(BIN_DIR)
-	$(CCPP) $(INCLUDE_DIRS) -std=c++11 $(SRC_DIR)/compile_model.cpp -ldl -lboost_system -lboost_filesystem -o $(BIN_DIR)/compile_model
+	$(CCPP) $(INCLUDE_DIRS) -std=c++11 $(COMPILER_SRC) -ldl -lboost_system -lboost_filesystem -o $(COMPILER_BIN)
 
+.PHONY: clean
 clean:
 	@rm -rf $(BIN_DIR) $(LIB_DIR)
-
-.PHONY: clean model compiler evaluator
