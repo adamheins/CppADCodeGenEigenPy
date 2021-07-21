@@ -18,17 +18,10 @@ class ADFunction {
         model = lib->model(model_name);
     }
 
-    ADFunction(const std::string& model_name,
-               std::unique_ptr<CppAD::cg::DynamicLib<Scalar>> lib)
-        : lib(std::move(lib)) {
-        model = this->lib->model(model_name);
-    }
-
     Vector evaluate(const Eigen::Ref<const Vector> x) {
         // We need to explicitly tell the compiler what the template parameter
         // is (Vector), since otherwise it will deduce it as Eigen::Ref, which
-        // won't work. The syntax for doing so with methods is somewhat odd,
-        // see <https://stackoverflow.com/a/3505738/5145874>.
+        // won't work. See <https://stackoverflow.com/a/3505738/5145874>.
         return model->template ForwardZero<Vector>(x);
     }
 

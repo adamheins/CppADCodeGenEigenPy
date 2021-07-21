@@ -2,11 +2,13 @@
 
 #include <CppADCodeGenEigenPy/ADFunction.h>
 
+#include "example/Defs.h"
+
 
 int main() {
     using Scalar = double;
 
-    ADFunction<Scalar> f("my_model", "autogen/libmy_model");
+    ADFunction<Scalar> f(MODEL_NAME, LIB_NAME);
 
     using Vector = ADFunction<Scalar>::Vector;
     using Matrix = ADFunction<Scalar>::Matrix;

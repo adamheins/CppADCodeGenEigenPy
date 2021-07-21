@@ -1,12 +1,15 @@
-#include "CppADCodeGenEigenPy/ADModel.h"
+#include <iostream>
+
+#include <CppADCodeGenEigenPy/ADModel.h>
+
+#include "example/Defs.h"
 
 
 struct MyADModel : ADModel<double> {
-    MyADModel(size_t input_dim, size_t output_dim)
-        : ADModel("my_model", input_dim, output_dim, "autogen"){};
+    MyADModel() : ADModel(MODEL_NAME, FOLDER_NAME){};
 
     // Generate the input to the function
-    ADVector input() { return ADVector::Ones(input_dim); }
+    ADVector input() override { return ADVector::Ones(NUM_INPUT); }
 
     // Evaluate the function
     ADVector function(const ADVector& x) override {
@@ -18,6 +21,6 @@ struct MyADModel : ADModel<double> {
 
 
 int main() {
-    MyADModel model(3, 3);
+    MyADModel model;
     model.compile();
 }
