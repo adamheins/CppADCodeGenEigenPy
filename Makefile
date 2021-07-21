@@ -1,12 +1,15 @@
 CCPP=g++
-BIN_DIR=bin
-LIB_DIR=lib
+PYTHON_DIR=python
+MODULE_NAME=CppADCodeGenEigenPy
+MODULE_PATH=$(PYTHON_DIR)/$(MODULE_NAME)$(shell python3.7-config --extension-suffix)
+INCLUDE_DIRS=-I/usr/local/include/eigen3 -Iinclude -Ideps/pybind11/include $(shell python3.7-config --includes)
 
 # TODO
+.PHONY: bindings
 bindings:
-	$(CCPP) -O3 -Wall -shared -I/usr/local/include/eigen3 -Iinclude -Ideps/pybind11/include $(shell python3.7-config --includes) -std=c++11 -fPIC src/bindings.cpp -ldl -o $(LIB_DIR)/example$(shell python3.7-config --extension-suffix)
+	@mkdir -p $(PYTHON_DIR)
+	$(CCPP) -O3 -Wall -shared $(INCLUDE_DIRS) -std=c++11 -fPIC src/bindings.cpp -ldl -o $(MODULE_PATH)
 
+.PHONY: clean
 clean:
-	@rm -rf $(BIN_DIR)
-
-.PHONY: clean bindings model compiler evaluator
+	@rm -rf $(PYTHON_DIR)
