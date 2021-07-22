@@ -21,7 +21,7 @@ double add(double a, double b) {
     return a + b;
 }
 
-PYBIND11_MODULE(example, m) {
+PYBIND11_MODULE(CppADCodeGenEigenPy, m) {
     m.doc() = "pybind11 example plugin"; // optional module docstring
 
     m.def("add", &add, "A function which adds two numbers");
@@ -29,7 +29,7 @@ PYBIND11_MODULE(example, m) {
 
     // TODO I've hardcoded double into this for now
     py::class_<ADFunction<double>>(m, "ADFunction")
-        .def(py::init<const std::string&, const std::string&, size_t, size_t>())
+        .def(py::init<const std::string&, const std::string&>())
         .def("evaluate", &ADFunction<double>::evaluate)
         .def("jacobian", &ADFunction<double>::jacobian);
 }
