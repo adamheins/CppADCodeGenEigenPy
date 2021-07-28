@@ -9,7 +9,7 @@ MODEL_LIB=$(LIB_DIR)/lib$(MODEL_NAME).so
 EVALUATOR_SRC=$(SRC_DIR)/evaluate_model.cpp
 EVALUATOR_BIN=$(BIN_DIR)/evaluate_model
 
-INCLUDE_DIRS=-I/usr/local/include/eigen3 -I../include -Iinclude
+INCLUDE_DIRS=-I/usr/local/include/eigen3 -Iinclude
 
 .PHONY: evaluate
 evaluate: $(EVALUATOR_BIN)

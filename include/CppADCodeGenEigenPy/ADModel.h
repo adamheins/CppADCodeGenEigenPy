@@ -3,6 +3,8 @@
 #include <cppad/cg.hpp>
 #include <cppad/example/cppad_eigen.hpp>
 
+#include <iostream>
+
 // Compiles the model
 template <typename Scalar>
 class ADModel {
@@ -33,14 +35,20 @@ class ADModel {
                      "-O3", "-march=native", "-mtune=native", "-ffast-math"}) {
         boost::filesystem::create_directories(folder_name);
 
+        // TODO not sure if I can put together, declare independent, and break
+        // apart for passing through the function
         ADVector x = input();
-        CppAD::Independent(x);
+        ADVector p = parameters();
+        ADVector xp(x.size() + p.size());
+        xp << x, p;
+
+        CppAD::Independent(xp);
 
         // Apply the model function to get output
-        ADVector y = function(x);
+        ADVector y = function(xp.head(x.size()), xp.tail(p.size()));
 
         // Record the relationship for AD
-        CppAD::ADFun<ADBase> ad_func(x, y);
+        CppAD::ADFun<ADBase> ad_func(xp, y);
 
         // Optimize the operation sequence
         ad_func.optimize();
@@ -71,9 +79,28 @@ class ADModel {
     }
 
    protected:
-    virtual ADVector function(const ADVector& x) = 0;
+    virtual ADVector function(const ADVector& x) {
+        // Default function is a just a single 0.
+        return ADVector::Zero(1);
+    }
+
+    virtual ADVector function(const ADVector& x, const ADVector& p) {
+        // We only want user to have to override one of the "function" methods,
+        // which means neither can be pure virtual. This is one downside: the
+        // compiler will let you compile a model with a default function value.
+        //
+        // This overload will always be called by the other code in the class, so either:
+        // * this one is overridden, and this implementation does not matter
+        // * the first is overridden, which is called by this
+        return function(x);
+    }
 
     virtual ADVector input() = 0;
+
+    virtual ADVector parameters() {
+        // Default is to have no parameters (i.e., an empty vector).
+        return ADVector(0);
+    };
 
     std::string model_name;
     std::string folder_name;
