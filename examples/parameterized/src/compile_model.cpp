@@ -4,13 +4,15 @@
 
 #include "example/Defs.h"
 
-struct MyADModel : ADModel<double> {
-    MyADModel() : ADModel(MODEL_NAME, FOLDER_NAME){};
+struct MyParameterizedADModel : ADModel<double> {
+    MyParameterizedADModel() : ADModel(MODEL_NAME, FOLDER_NAME){};
 
-    ADVector parameters() override { return ADVector::Ones(1); }
-
-    // Generate the input to the function
+    // Generate the input to the function used when recording autodiff
+    // operations.
     ADVector input() override { return ADVector::Ones(NUM_INPUT); }
+
+    // Also define the vector of paramters
+    ADVector parameters() override { return ADVector::Ones(NUM_PARAM); }
 
     // Evaluate the function
     ADVector function(const ADVector& input,
@@ -22,6 +24,6 @@ struct MyADModel : ADModel<double> {
 };
 
 int main() {
-    MyADModel model;
+    MyParameterizedADModel model;
     model.compile();
 }

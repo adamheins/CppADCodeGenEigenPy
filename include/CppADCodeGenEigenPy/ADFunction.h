@@ -19,17 +19,18 @@ class ADFunction {
     }
 
     Vector evaluate(const Eigen::Ref<const Vector>& input) {
+        // Warn if input size is too small, which may mean the user should have
+        // passed parameters.
+        if (input.size() < model->Domain()) {
+            std::cerr << "Model domain is " << model->Domain()
+                      << ", but input is of size " << input.size()
+                      << ". Did you mean to pass parameters, too?" << std::endl;
+        }
+        assert(input.rows() == model->Domain());
+
         // We need to explicitly tell the compiler what the template parameter
         // is (Vector), since otherwise it will deduce it as Eigen::Ref, which
         // won't work. See <https://stackoverflow.com/a/3505738/5145874>.
-        if (input.rows() != model->Domain()) {
-            assert(false);
-            std::cout << "Model domain is " << model->Domain()
-                      << ", but input has " << input.rows() << " rows."
-                      << std::endl;
-        }
-        // assert(input.rows() ==
-        //        model->Domain());  // TODO should we have such checks?
         return model->template ForwardZero<Vector>(input);
     }
 
@@ -37,6 +38,18 @@ class ADFunction {
                     const Eigen::Ref<const Vector>& parameters) {
         Vector xp(input.size() + parameters.size());
         xp << input, parameters;
+
+        // Warn if input + parameters vector is too large, which may mean the
+        // user shouldn't have passed parameters
+        if (xp.size() > model->Domain()) {
+            std::cerr << "Input size is " << input.size()
+                      << " and parameter size is " << parameters.size()
+                      << ". The total is " << xp.size()
+                      << ", which larger than the model domain "
+                      << model->Domain()
+                      << ". Maybe you meant not to pass parameters?"
+                      << std::endl;
+        }
         return evaluate(xp);
     }
 

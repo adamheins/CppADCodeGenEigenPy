@@ -13,10 +13,9 @@ int main() {
     using Vector = ADFunction<Scalar>::Vector;
     using Matrix = ADFunction<Scalar>::Matrix;
 
-    Vector x = Vector::Ones(3);
-    Vector p = Vector::Ones(1);
-    Vector y = f.evaluate(x, p);
-    Matrix J = f.jacobian(x, p);
+    Vector x = Vector::Ones(NUM_INPUT);
+    Vector y = f.evaluate(x);
+    Matrix J = f.jacobian(x);
 
     std::cout << y << std::endl;
     std::cout << J << std::endl;
