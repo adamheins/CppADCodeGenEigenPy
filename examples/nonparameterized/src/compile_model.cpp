@@ -4,30 +4,6 @@
 
 #include "example/Defs.h"
 
-// template<typename Scalar>
-// using ADScalar = CppAD::AD<CppAD::cg::CG<Scalar>>;
-//
-// template<typename Scalar>
-// using ADMatrix =
-//     Eigen::Matrix<ADScalar<Scalar>, Eigen::Dynamic, Eigen::Dynamic,
-//     Eigen::RowMajor>;
-//
-// template<typename Scalar>
-// ADMatrix<Scalar> operator*(const ADMatrix<Scalar>& lhs, const Scalar& rhs) {
-//     return lhs * ADScalar<Scalar>(rhs);
-// }
-
-// Instantiate the template function
-// template ADMatrix<double> operator*<double>(const ADMatrix<double>&, const
-// double&);
-
-// ADMatrix<double> operator*(const ADMatrix<double>& lhs, const double& rhs) {
-//     return lhs * ADScalar<double>(rhs);
-// }
-//
-// ADMatrix<double> operator*(const double& lhs, const ADMatrix<double>& rhs) {
-//     return ADScalar<double>(lhs) * rhs;
-// }
 
 template <typename Scalar>
 struct MyADModel : public ADModel<Scalar> {
