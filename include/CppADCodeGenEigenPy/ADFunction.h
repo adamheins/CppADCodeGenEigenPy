@@ -56,6 +56,7 @@ class ADFunction {
     }
 
     Matrix jacobian(const Eigen::Ref<const Vector>& input) {
+        // TODO actually check if Jacobian is available
         assert(input.rows() == model->Domain());
         Vector J_vec = model->template Jacobian<Vector>(input);
         Eigen::Map<Matrix> J(J_vec.data(), model->Range(), model->Domain());
@@ -68,6 +69,25 @@ class ADFunction {
         Vector xp(input.size() + parameters.size());
         xp << input, parameters;
         return jacobian(xp).leftCols(input.rows());
+    }
+
+    Matrix hessian(const Eigen::Ref<const Vector>& input, size_t output_dim) {
+        if (!model->isHessianAvailable()) {
+            throw std::runtime_error(
+                "Hessian is not available for this model.");
+        }
+        Vector H_vec = model->template Hessian<Vector>(input, output_dim);
+        Eigen::Map<Matrix> H(H_vec.data(), model->Domain(), model->Domain());
+        assert(H.allFinite());
+        return H;
+    }
+
+    Matrix hessian(const Eigen::Ref<const Vector>& input,
+                   const Eigen::Ref<const Vector>& parameters,
+                   size_t output_dim) {
+        Vector xp(input.size() + parameters.size());
+        xp << input, parameters;
+        return hessian(xp, output_dim).leftCols(input.rows());
     }
 
    protected:

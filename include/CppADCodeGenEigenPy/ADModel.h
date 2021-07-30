@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+enum class ADOrder { Zero, First, Second };
+
 // Compiles the model
 template <typename Scalar>
 class ADModel {
@@ -19,8 +21,8 @@ class ADModel {
     using ADMatrix = Eigen::Matrix<ADScalar, Eigen::Dynamic, Eigen::Dynamic,
                                    Eigen::RowMajor>;
 
-    ADModel(std::string model_name, std::string folder_name = "/tmp/cppad")
-        : model_name(model_name), folder_name(folder_name) {
+    ADModel(std::string model_name, std::string folder_name, ADOrder order = ADOrder::First)
+        : model_name(model_name), folder_name(folder_name), order(order) {
         library_name = folder_name + "/lib" + model_name;
     }
 
@@ -30,6 +32,10 @@ class ADModel {
         return boost::filesystem::exists(
             library_name +
             CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION);
+    }
+
+    void set_create_hessian(bool create_hessian) {
+        this->create_hessian = create_hessian;
     }
 
     void compile(bool verbose = false,
@@ -59,10 +65,13 @@ class ADModel {
         // TODO optionally support Hessian
         // TODO support sparse Jacobian/Hessian
         CppAD::cg::ModelCSourceGen<Scalar> source_gen(ad_func, model_name);
-        source_gen.setCreateJacobian(true);
+        if (order >= ADOrder::First) {
+            source_gen.setCreateJacobian(true);
+        }
+        if (order >= ADOrder::Second) {
+            source_gen.setCreateHessian(true);
+        }
 
-        // Compiler objects, compile to temporary shared library file to avoid
-        // interference between processes
         CppAD::cg::ModelLibraryCSourceGen<Scalar> lib_source_gen(source_gen);
         CppAD::cg::GccCompiler<Scalar> compiler;
         CppAD::cg::DynamicModelLibraryProcessor<Scalar> lib_processor(
@@ -91,7 +100,8 @@ class ADModel {
         // which means neither can be pure virtual. This is one downside: the
         // compiler will let you compile a model with a default function value.
         //
-        // This overload will always be called by the other code in the class, so either:
+        // This overload will always be called by the other code in the class,
+        // so either:
         // * this one is overridden, and this implementation does not matter
         // * the first is overridden, which is called by this
         return function(x);
@@ -107,4 +117,5 @@ class ADModel {
     std::string model_name;
     std::string folder_name;
     std::string library_name;  // NOTE: does not include the extension
+    ADOrder order;
 };
