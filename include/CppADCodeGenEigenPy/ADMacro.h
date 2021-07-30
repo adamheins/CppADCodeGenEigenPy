@@ -1,9 +1,4 @@
-// #include <Eigen/Eigen>
-// #include <boost/filesystem.hpp>
-// #include <cppad/cg.hpp>
-// #include <cppad/example/cppad_eigen.hpp>
-//
-// #include "CppADCodeGenEigenPy/ADFunction.h"
+#pragma once
 
 #define BEGIN_AD_MODEL(Model, Scalar)              \
     struct Model : ADModel<Scalar> {               \

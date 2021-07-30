@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Eigen/Eigen>
 #include <boost/filesystem.hpp>
 #include <cppad/cg.hpp>

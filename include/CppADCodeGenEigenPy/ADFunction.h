@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Eigen/Eigen>
 #include <cppad/cg.hpp>
 #include <cppad/example/cppad_eigen.hpp>
