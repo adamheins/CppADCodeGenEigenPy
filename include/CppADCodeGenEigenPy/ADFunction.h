@@ -56,7 +56,11 @@ class ADFunction {
     }
 
     Matrix jacobian(const Eigen::Ref<const Vector>& input) {
-        // TODO actually check if Jacobian is available
+        if (!model->isJacobianAvailable()) {
+            throw std::runtime_error(
+                "Jacobian is not available for this model.");
+        }
+
         assert(input.rows() == model->Domain());
         Vector J_vec = model->template Jacobian<Vector>(input);
         Eigen::Map<Matrix> J(J_vec.data(), model->Range(), model->Domain());

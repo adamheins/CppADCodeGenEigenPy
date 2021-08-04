@@ -21,13 +21,15 @@ from C++ or imported into Python.
 git clone ...
 cd CppADCodeGenEigenPy
 mkdir build
-cd build
-cmake ..
-make
+cmake -S . -B build
+cmake --build build
 
 # headers are installed to the usual system-wide include location
 # the python module is installed to whichever Python is active
 sudo make install
+
+# run tests
+cd build && ctest
 ```
 
 

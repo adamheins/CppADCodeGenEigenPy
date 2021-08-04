@@ -1,12 +1,13 @@
 #pragma once
 
 #include <Eigen/Eigen>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>  // TODO would like to eliminate boost dep
 #include <cppad/cg.hpp>
 #include <cppad/example/cppad_eigen.hpp>
 
 #include <iostream>
 
+// Derivative order
 enum class ADOrder { Zero, First, Second };
 
 // Compiles the model
@@ -21,21 +22,19 @@ class ADModel {
     using ADMatrix = Eigen::Matrix<ADScalar, Eigen::Dynamic, Eigen::Dynamic,
                                    Eigen::RowMajor>;
 
-    ADModel(std::string model_name, std::string folder_name, ADOrder order = ADOrder::First)
+    ADModel(std::string model_name, std::string folder_name,
+            ADOrder order = ADOrder::First)
         : model_name(model_name), folder_name(folder_name), order(order) {
         library_name = folder_name + "/lib" + model_name;
     }
 
     ~ADModel() = default;
 
-    bool library_exists() {
-        return boost::filesystem::exists(
-            library_name +
-            CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION);
-    }
+    bool library_exists() { return boost::filesystem::exists(library_path()); }
 
-    void set_create_hessian(bool create_hessian) {
-        this->create_hessian = create_hessian;
+    bool library_path() {
+        return library_name +
+               CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION;
     }
 
     void compile(bool verbose = false,
@@ -43,8 +42,6 @@ class ADModel {
                      "-O3", "-march=native", "-mtune=native", "-ffast-math"}) {
         boost::filesystem::create_directories(folder_name);
 
-        // TODO not sure if I can put together, declare independent, and break
-        // apart for passing through the function
         ADVector x = input();
         ADVector p = parameters();
         ADVector xp(x.size() + p.size());
@@ -62,7 +59,6 @@ class ADModel {
         ad_func.optimize();
 
         // generates source code
-        // TODO optionally support Hessian
         // TODO support sparse Jacobian/Hessian
         CppAD::cg::ModelCSourceGen<Scalar> source_gen(ad_func, model_name);
         if (order >= ADOrder::First) {
