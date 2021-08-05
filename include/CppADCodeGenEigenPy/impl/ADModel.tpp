@@ -1,6 +1,14 @@
 #pragma once
 
 template <typename Scalar>
+ADModel<Scalar>::ADModel(std::string model_name, std::string folder_name,
+                         ADOrder order)
+    : model_name_(model_name),
+      folder_name_(folder_name),
+      order_(order),
+      library_generic_path_(folder_name + "/lib" + model_name) {}
+
+template <typename Scalar>
 bool ADModel<Scalar>::library_exists() const {
     return boost::filesystem::exists(get_library_real_path());
 }

@@ -23,11 +23,7 @@ class ADModel {
                                    Eigen::RowMajor>;
 
     ADModel(std::string model_name, std::string folder_name,
-            ADOrder order = ADOrder::First)
-        : model_name_(model_name),
-          folder_name_(folder_name),
-          order_(order),
-          library_generic_path_(folder_name + "/lib" + model_name) {}
+            ADOrder order = ADOrder::First);
 
     ~ADModel() = default;
 
