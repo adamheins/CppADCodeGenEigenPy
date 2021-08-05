@@ -7,16 +7,6 @@
 
 namespace py = pybind11;
 
-// Basic Eigen binding example; can be called in Python with:
-// import example
-// example.vec_func(np.ndarray)
-// if array is not of type float64 (double), it will be copied
-Eigen::VectorXd vec_func(const Eigen::Ref<const Eigen::VectorXd> x) {
-    return 2 * x;
-}
-
-double add(double a, double b) { return a + b; }
-
 PYBIND11_MODULE(CppADCodeGenEigenPy, m) {
     using Scalar = double;
     using Vector = ADFunction<Scalar>::Vector;
@@ -24,15 +14,10 @@ PYBIND11_MODULE(CppADCodeGenEigenPy, m) {
 
     m.doc() = "Bindings for code auto-differentiated using CppADCodeGen.";
 
-    // m.def("add", &add, "A function which adds two numbers");
-    // m.def("vec_func", &vec_func, "Vector function",
-    // py::return_value_policy::reference_internal);
-
-    // TODO I've hardcoded double into this for now
+    // TODO I've hardcoded double into this for now---not sure if I can
+    // actually get away from this...
     py::class_<ADFunction<Scalar>>(m, "ADFunction")
         .def(py::init<const std::string&, const std::string&>())
-        // .def("evaluate", &ADFunction<Scalar>::evaluate)
-        // .def("jacobian", &ADFunction<double>::jacobian);
         .def("evaluate", static_cast<Vector (ADFunction<Scalar>::*)(
                              const Eigen::Ref<const Vector>&) const>(
                              &ADFunction<Scalar>::evaluate),
@@ -50,5 +35,18 @@ PYBIND11_MODULE(CppADCodeGenEigenPy, m) {
                              const Eigen::Ref<const Vector>&,
                              const Eigen::Ref<const Vector>&) const>(
                              &ADFunction<Scalar>::jacobian),
-             "Evaluate Jacobian with parameters.");
+             "Evaluate Jacobian with parameters.")
+        .def("hessian", static_cast<Matrix (ADFunction<Scalar>::*)(
+                            const Eigen::Ref<const Vector>&, size_t) const>(
+                            &ADFunction<Scalar>::hessian),
+             "Evaluate Hessian with no parameters.")
+        .def("hessian", static_cast<Matrix (ADFunction<Scalar>::*)(
+                            const Eigen::Ref<const Vector>&,
+                            const Eigen::Ref<const Vector>&, size_t) const>(
+                            &ADFunction<Scalar>::hessian),
+             "Evaluate Hessian with parameters.")
+        .def_property_readonly("input_size",
+                               &ADFunction<Scalar>::get_input_size)
+        .def_property_readonly("output_size",
+                               &ADFunction<Scalar>::get_output_size);
 }
