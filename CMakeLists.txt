@@ -9,25 +9,34 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(Boost COMPONENTS filesystem REQUIRED)
 
-# find pybind11
-add_subdirectory(deps/pybind11)
-
-# Get googletest from github
 include(FetchContent)
+
+# get pybind11 from github
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11
+    GIT_TAG        v2.7.1
+)
+FetchContent_MakeAvailable(pybind11)
+
+# get googletest from github
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
 )
+
+# avoid installing googletest along with this project
+option(INSTALL_GTEST "Enable installation of googletest." OFF)
 FetchContent_MakeAvailable(googletest)
 
 # generate the Python bindings
 pybind11_add_module(${PROJECT_NAME} src/bindings.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${PROJECT_NAME} PUBLIC include/)
 
 # install the module containing the bindings
 install(TARGETS ${PROJECT_NAME} DESTINATION ${Python3_SITELIB})
 
-# install header files
+# install project header files
 install(DIRECTORY include/ DESTINATION include)
 
 # testing

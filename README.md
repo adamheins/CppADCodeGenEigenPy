@@ -27,6 +27,8 @@ cmake --build build
 # headers are installed to the usual system-wide include location
 # the python module is installed to whichever Python is active
 sudo make install
+# or
+sudo cmake --install build
 
 # run tests
 cd build && ctest
