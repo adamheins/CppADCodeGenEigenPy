@@ -2,6 +2,9 @@
 
 CppADCodeGen meets pybind11 with an Eigen interface.
 
+This project has been tested on Ubuntu 16.04. It should work on more recent
+Ubuntu versions, and likely works on other *nix systems as well.
+
 ## Motivation
 
 I want to be able to prototype code in Python while making use of fast,
@@ -17,6 +20,14 @@ derivates) into a dynamic library. This dynamic library can then be easily used
 from C++ or imported into Python.
 
 ## Install
+
+First ensure you have the required dependencies:
+* a compiler with C++11 support
+* [cmake](https://cmake.org/) version 3.12+
+* [Boost](https://www.boost.org/) (tested with version 1.58)
+* [CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)
+
+Then clone and built CppADCodeGenEigenPy:
 ```
 git clone ...
 cd CppADCodeGenEigenPy
@@ -34,4 +45,13 @@ sudo cmake --install build
 cd build && ctest
 ```
 
+## Example
 
+This is basic example that you can also find implemented in the `examples`
+directory, along with some others.
+
+TODO
+
+## License
+
+TODO

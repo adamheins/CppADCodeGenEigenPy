@@ -43,16 +43,16 @@ install(DIRECTORY include/ DESTINATION include)
 enable_testing()
 
 add_executable(
-  model_test
-  test/model_test.cpp
+  basic_model_test
+  tests/basic_model_test.cpp
 )
-target_include_directories(model_test PUBLIC include)
+target_include_directories(basic_model_test PUBLIC include)
 target_link_libraries(
-  model_test
+  basic_model_test
   gtest_main
   dl
   ${Boost_LIBRARIES}
 )
 
 include(GoogleTest)
-gtest_discover_tests(model_test)
+gtest_discover_tests(basic_model_test)

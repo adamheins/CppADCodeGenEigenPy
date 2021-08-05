@@ -9,21 +9,21 @@ using Scalar = double;
 using Vector = ADFunction<Scalar>::Vector;
 using Matrix = ADFunction<Scalar>::Matrix;
 
-static const std::string MODEL_NAME = "TestModel";
+static const std::string MODEL_NAME = "BasicTestModel";
 static const std::string FOLDER_NAME = "/tmp/CppADCodeGenEigenPy";
-
-// TODO would probably be better if this was just the path
-static const std::string LIB_NAME = FOLDER_NAME + "/lib" + MODEL_NAME;
 
 static const int NUM_INPUT = 3;
 
+
+// Create a basic model that takes in a vector of length 3 and multiples it by
+// 2.
 template <typename Scalar>
-struct MyADModel : public ADModel<Scalar> {
+struct BasicTestModel : public ADModel<Scalar> {
     using typename ADModel<Scalar>::ADScalar;
     using typename ADModel<Scalar>::ADVector;
 
-    MyADModel(const std::string& model_name, const std::string& folder_name,
-              ADOrder order)
+    BasicTestModel(const std::string& model_name,
+                   const std::string& folder_name, ADOrder order)
         : ADModel<Scalar>(model_name, folder_name, order){};
 
     // Generate the input to the function
@@ -36,25 +36,26 @@ struct MyADModel : public ADModel<Scalar> {
     }
 };
 
-class ADModelTest : public ::testing::Test {
+class BasicTestModelFixture : public ::testing::Test {
    protected:
     void SetUp() override {
-        model_ptr_.reset(
-            new MyADModel<Scalar>(MODEL_NAME, FOLDER_NAME, ADOrder::Second));
+        model_ptr_.reset(new BasicTestModel<Scalar>(MODEL_NAME, FOLDER_NAME,
+                                                    ADOrder::Second));
         model_ptr_->compile();
     }
 
+    // TODO we could delete the .so afterward
     // void TearDown() override {}
 
-    std::unique_ptr<MyADModel<Scalar>> model_ptr_;
+    std::unique_ptr<ADModel<Scalar>> model_ptr_;
 };
 
-TEST_F(ADModelTest, CreatesSharedLib) {
+TEST_F(BasicTestModelFixture, CreatesSharedLib) {
     ASSERT_TRUE(model_ptr_->library_exists())
         << "Shared library file not found.";
 }
 
-TEST_F(ADModelTest, ADFunctionDimensions) {
+TEST_F(BasicTestModelFixture, ADFunctionDimensions) {
     ADFunction<Scalar> f(model_ptr_->get_model_name(),
                          model_ptr_->get_library_generic_path());
 
@@ -71,8 +72,9 @@ TEST_F(ADModelTest, ADFunctionDimensions) {
     ASSERT_THROW(f.hessian(x, 0), std::runtime_error);
 }
 
-TEST_F(ADModelTest, ADFunctionEvaluation) {
-    ADFunction<Scalar> f(MODEL_NAME, LIB_NAME);
+TEST_F(BasicTestModelFixture, ADFunctionEvaluation) {
+    ADFunction<Scalar> f(model_ptr_->get_model_name(),
+                         model_ptr_->get_library_generic_path());
 
     Vector x(NUM_INPUT);
     x.setOnes();
