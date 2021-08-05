@@ -37,6 +37,7 @@ add_executable(
   model_test
   test/model_test.cpp
 )
+target_include_directories(model_test PUBLIC include)
 target_link_libraries(
   model_test
   gtest_main

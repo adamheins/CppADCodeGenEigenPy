@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/Eigen>
-#include <boost/filesystem.hpp>  // TODO would like to eliminate boost dep
+#include <boost/filesystem.hpp>
 #include <cppad/cg.hpp>
 #include <cppad/example/cppad_eigen.hpp>
 
@@ -24,94 +24,38 @@ class ADModel {
 
     ADModel(std::string model_name, std::string folder_name,
             ADOrder order = ADOrder::First)
-        : model_name(model_name), folder_name(folder_name), order(order) {
-        library_name = folder_name + "/lib" + model_name;
-    }
+        : model_name_(model_name),
+          folder_name_(folder_name),
+          order_(order),
+          library_generic_path_(folder_name + "/lib" + model_name) {}
 
     ~ADModel() = default;
 
-    bool library_exists() { return boost::filesystem::exists(library_path()); }
+    bool library_exists() const;
 
-    bool library_path() {
-        return library_name +
-               CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION;
-    }
+    std::string get_library_real_path() const;
+
+    std::string get_library_generic_path() const;
+
+    std::string get_model_name() const;
 
     void compile(bool verbose = false,
                  std::vector<std::string> compile_flags = {
-                     "-O3", "-march=native", "-mtune=native", "-ffast-math"}) {
-        boost::filesystem::create_directories(folder_name);
-
-        ADVector x = input();
-        ADVector p = parameters();
-        ADVector xp(x.size() + p.size());
-        xp << x, p;
-
-        CppAD::Independent(xp);
-
-        // Apply the model function to get output
-        ADVector y = function(xp.head(x.size()), xp.tail(p.size()));
-
-        // Record the relationship for AD
-        CppAD::ADFun<ADBase> ad_func(xp, y);
-
-        // Optimize the operation sequence
-        ad_func.optimize();
-
-        // generates source code
-        // TODO support sparse Jacobian/Hessian
-        CppAD::cg::ModelCSourceGen<Scalar> source_gen(ad_func, model_name);
-        if (order >= ADOrder::First) {
-            source_gen.setCreateJacobian(true);
-        }
-        if (order >= ADOrder::Second) {
-            source_gen.setCreateHessian(true);
-        }
-
-        CppAD::cg::ModelLibraryCSourceGen<Scalar> lib_source_gen(source_gen);
-        CppAD::cg::GccCompiler<Scalar> compiler;
-        CppAD::cg::DynamicModelLibraryProcessor<Scalar> lib_processor(
-            lib_source_gen, library_name);
-
-        compiler.setCompileLibFlags(compile_flags);
-        compiler.addCompileLibFlag("-shared");
-        compiler.addCompileLibFlag("-rdynamic");
-
-        // Compile the library
-        std::unique_ptr<CppAD::cg::DynamicLib<Scalar>> lib =
-            lib_processor.createDynamicLibrary(compiler);
-        if (verbose) {
-            std::cout << "Compiled library to " << library_name << std::endl;
-        }
-    }
-
+                     "-O3", "-march=native", "-mtune=native",
+                     "-ffast-math"}) const;
    protected:
-    virtual ADVector function(const ADVector& x) {
-        // Default function is a just a single 0.
-        return ADVector::Zero(1);
-    }
+    virtual ADVector function(const ADVector& x) const;
 
-    virtual ADVector function(const ADVector& x, const ADVector& p) {
-        // We only want user to have to override one of the "function" methods,
-        // which means neither can be pure virtual. This is one downside: the
-        // compiler will let you compile a model with a default function value.
-        //
-        // This overload will always be called by the other code in the class,
-        // so either:
-        // * this one is overridden, and this implementation does not matter
-        // * the first is overridden, which is called by this
-        return function(x);
-    }
+    virtual ADVector function(const ADVector& x, const ADVector& p) const;
 
-    virtual ADVector input() = 0;
+    virtual ADVector input() const = 0;
 
-    virtual ADVector parameters() {
-        // Default is to have no parameters (i.e., an empty vector).
-        return ADVector(0);
-    };
+    virtual ADVector parameters() const;
 
-    std::string model_name;
-    std::string folder_name;
-    std::string library_name;  // NOTE: does not include the extension
-    ADOrder order;
+    std::string model_name_;
+    std::string folder_name_;
+    std::string library_generic_path_;
+    ADOrder order_;
 };
+
+#include "impl/ADModel.tpp"

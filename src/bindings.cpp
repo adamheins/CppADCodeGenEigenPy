@@ -34,21 +34,21 @@ PYBIND11_MODULE(CppADCodeGenEigenPy, m) {
         // .def("evaluate", &ADFunction<Scalar>::evaluate)
         // .def("jacobian", &ADFunction<double>::jacobian);
         .def("evaluate", static_cast<Vector (ADFunction<Scalar>::*)(
-                             const Eigen::Ref<const Vector>&)>(
+                             const Eigen::Ref<const Vector>&) const>(
                              &ADFunction<Scalar>::evaluate),
              "Evaluate function with no parameters.")
         .def("evaluate", static_cast<Vector (ADFunction<Scalar>::*)(
                              const Eigen::Ref<const Vector>&,
-                             const Eigen::Ref<const Vector>&)>(
+                             const Eigen::Ref<const Vector>&) const>(
                              &ADFunction<Scalar>::evaluate),
              "Evaluate function with parameters.")
         .def("jacobian", static_cast<Matrix (ADFunction<Scalar>::*)(
-                             const Eigen::Ref<const Vector>&)>(
+                             const Eigen::Ref<const Vector>&) const>(
                              &ADFunction<Scalar>::jacobian),
              "Evaluate Jacobian with no parameters.")
         .def("jacobian", static_cast<Matrix (ADFunction<Scalar>::*)(
                              const Eigen::Ref<const Vector>&,
-                             const Eigen::Ref<const Vector>&)>(
+                             const Eigen::Ref<const Vector>&) const>(
                              &ADFunction<Scalar>::jacobian),
              "Evaluate Jacobian with parameters.");
 }
