@@ -13,6 +13,7 @@ static const std::string MODEL_NAME = "BasicTestModel";
 static const std::string FOLDER_NAME = "/tmp/CppADCodeGenEigenPy";
 
 static const int NUM_INPUT = 3;
+static const int NUM_OUTPUT = NUM_INPUT;
 
 
 // Create a basic model that takes in a vector of length 3 and multiples it by
