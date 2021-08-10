@@ -62,7 +62,7 @@ TEST_F(BasicTestModelFixture, ADFunctionDimensions) {
 
     // test that the model shape is correct
     ASSERT_EQ(f.get_input_size(), NUM_INPUT) << "Input size is incorrect.";
-    ASSERT_EQ(f.get_output_size(), NUM_INPUT) << "Output size is incorrect.";
+    ASSERT_EQ(f.get_output_size(), NUM_OUTPUT) << "Output size is incorrect.";
 
     // generate an input with a size too large
     Vector x(NUM_INPUT + 1);
@@ -87,7 +87,7 @@ TEST_F(BasicTestModelFixture, ADFunctionEvaluation) {
         << "Function evaluation is incorrect.";
 
     // test Jacobian
-    Matrix J_expected(NUM_INPUT, NUM_INPUT);
+    Matrix J_expected(NUM_OUTPUT, NUM_INPUT);
     J_expected.setZero();
     J_expected.diagonal() << 2, 2, 2;
 

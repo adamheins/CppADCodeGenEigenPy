@@ -6,8 +6,6 @@
 #include <CppADCodeGenEigenPy/ADModel.h>
 
 using Scalar = double;
-using Vector = ADFunction<Scalar>::Vector;
-using Matrix = ADFunction<Scalar>::Matrix;
 
 static const std::string MODEL_NAME = "ParameterizedTestModel";
 static const std::string FOLDER_NAME = "/tmp/CppADCodeGenEigenPy";
@@ -15,6 +13,20 @@ static const std::string FOLDER_NAME = "/tmp/CppADCodeGenEigenPy";
 static const int NUM_INPUT = 3;
 static const int NUM_PARAM = NUM_INPUT;
 static const int NUM_OUTPUT = 1;
+
+template <typename Scalar>
+using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+
+// Parameterized sum of squares.
+template <typename Scalar>
+Vector<Scalar> evaluate(const Vector<Scalar>& input,
+                        const Vector<Scalar>& parameters) {
+    Vector<Scalar> output(NUM_OUTPUT);
+    for (int i = 0; i < NUM_INPUT; ++i) {
+        output(0) += 0.5 * parameters(i) * input(i) * input(i);
+    }
+    return output;
+}
 
 // Parameterized weighted sum model.
 template <typename Scalar>
@@ -34,59 +46,65 @@ struct ParameterizedTestModel : public ADModel<Scalar> {
     // Evaluate the function
     ADVector function(const ADVector& input,
                       const ADVector& parameters) const override {
-        ADVector output(1);
-        for (int i = 0; i < NUM_INPUT; ++i) {
-            output(0) += parameters(i) * input(i);
-        }
-        return output;
+        return evaluate<ADScalar>(input, parameters);
     }
 };
 
 class ParameterizedTestModelFixture : public ::testing::Test {
    protected:
+    using Vector = ADFunction<Scalar>::Vector;
+    using Matrix = ADFunction<Scalar>::Matrix;
+
     void SetUp() override {
         model_ptr_.reset(new ParameterizedTestModel<Scalar>(
             MODEL_NAME, FOLDER_NAME, ADOrder::Second));
         model_ptr_->compile();
+        function_ptr_.reset(
+            new ADFunction<Scalar>(model_ptr_->get_model_name(),
+                                   model_ptr_->get_library_generic_path()));
     }
-
-    // TODO we could delete the .so afterward
-    // void TearDown() override {}
 
     std::unique_ptr<ADModel<Scalar>> model_ptr_;
+    std::unique_ptr<ADFunction<Scalar>> function_ptr_;
 };
 
-TEST_F(ParameterizedTestModelFixture, ADFunctionEvaluation) {
-    ADFunction<Scalar> f(model_ptr_->get_model_name(),
-                         model_ptr_->get_library_generic_path());
+TEST_F(ParameterizedTestModelFixture, Evaluation) {
+    Vector input = Vector::Ones(NUM_INPUT);
+    Vector parameters = Vector::Ones(NUM_INPUT);
 
-    Vector x = Vector::Ones(NUM_INPUT);
-    Vector p = Vector::Ones(NUM_INPUT);
-
-    // test that the function output is correct
-    Vector y_expected = Vector::Zero(NUM_OUTPUT);
-    for (int i = 0; i < NUM_INPUT; ++i) {
-        y_expected(0) += p(i) * x(i);
-    }
-    Vector y_actual = f.evaluate(x, p);
+    Vector y_expected = evaluate<Scalar>(input, parameters);
+    Vector y_actual = function_ptr_->evaluate(input, parameters);
     ASSERT_TRUE(y_actual.isApprox(y_expected))
         << "Function evaluation is incorrect.";
 
     // if I forget to pass the parameters, I should get a runtime error
-    ASSERT_THROW(f.evaluate(x), std::runtime_error);
-
-    // // test Jacobian
-    // Matrix J_expected(NUM_INPUT, NUM_INPUT);
-    // J_expected.setZero();
-    // J_expected.diagonal() << 2, 2, 2;
-    //
-    // Matrix J_actual = f.jacobian(x);
-    //
-    // ASSERT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
-    //
-    // // test Hessian
-    // Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
-    // Matrix H_actual = f.hessian(x, 0);  // all should be zero
-    // ASSERT_TRUE(H_actual.isApprox(H_expected)) << "Hessian is incorrect.";
+    ASSERT_THROW(function_ptr_->evaluate(input), std::runtime_error)
+        << "Missing parameters did not throw error.";
 }
 
+TEST_F(ParameterizedTestModelFixture, Jacobian) {
+    Vector input = Vector::Ones(NUM_INPUT);
+    Vector parameters = Vector::Ones(NUM_INPUT);
+
+    // note Jacobian of scalar function is a row vector, hence the transpose
+    Matrix P = Matrix::Zero(NUM_INPUT, NUM_INPUT);
+    P.diagonal() << parameters;
+    Matrix J_expected = input.transpose() * P;
+    Matrix J_actual = function_ptr_->jacobian(input, parameters);
+    ASSERT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
+
+    ASSERT_THROW(function_ptr_->jacobian(input), std::runtime_error)
+        << "Missing parameters did not throw error.";
+}
+
+TEST_F(ParameterizedTestModelFixture, Hessian) {
+    Vector input = Vector::Ones(NUM_INPUT);
+    Vector parameters = Vector::Ones(NUM_INPUT);
+
+    Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
+    H_expected.diagonal() << parameters;
+    Matrix H_actual = function_ptr_->hessian(input, parameters, 0);
+    ASSERT_TRUE(H_actual.isApprox(H_expected)) << "Hessian is incorrect.";
+    ASSERT_THROW(function_ptr_->hessian(input, 0), std::runtime_error)
+        << "Missing parameters did not throw error.";
+}

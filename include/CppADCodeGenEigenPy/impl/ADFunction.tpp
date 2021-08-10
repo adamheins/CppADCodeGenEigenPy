@@ -85,7 +85,7 @@ typename ADFunction<Scalar>::Matrix ADFunction<Scalar>::hessian(
 
     Vector xp(input.size() + parameters.size());
     xp << input, parameters;
-    return hessian(xp, output_dim).leftCols(input.rows());
+    return hessian(xp, output_dim).topLeftCorner(input.rows(), input.rows());
 }
 
 template <typename Scalar>
