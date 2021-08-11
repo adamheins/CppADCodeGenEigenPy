@@ -18,7 +18,7 @@ using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 // Use various math routines: trigonometry, square root, vector operations
 template <typename Scalar>
-Vector<Scalar> evaluate_with_math_functions(const Vector<Scalar>& input) {
+static Vector<Scalar> evaluate(const Vector<Scalar>& input) {
     Vector<Scalar> output(NUM_OUTPUT);
     output << sin(input(0)) * cos(input(1)), sqrt(input(2)),
         input.transpose() * input;
@@ -39,11 +39,10 @@ struct MathFunctionsTestModel : public ADModel<Scalar> {
 
     // Evaluate the function
     ADVector function(const ADVector& input) const override {
-        return evaluate_with_math_functions<ADScalar>(input);
+        return evaluate<ADScalar>(input);
     }
 };
 
-// TODO we can probably put some of this stuff in a common file
 class MathFunctionsTestModelFixture : public ::testing::Test {
    protected:
     using Vector = ADFunction<Scalar>::Vector;
@@ -65,7 +64,7 @@ class MathFunctionsTestModelFixture : public ::testing::Test {
 TEST_F(MathFunctionsTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
 
-    Vector output_expected = evaluate_with_math_functions<Scalar>(input);
+    Vector output_expected = evaluate<Scalar>(input);
     Vector output_actual = function_ptr_->evaluate(input);
 
     ASSERT_TRUE(output_actual.isApprox(output_expected))

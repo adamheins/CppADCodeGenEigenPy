@@ -18,7 +18,7 @@ using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 // Just multiply input vector by 2.
 template <typename Scalar>
-Vector<Scalar> evaluate_basic(const Vector<Scalar>& input) {
+static Vector<Scalar> evaluate(const Vector<Scalar>& input) {
     return input * Scalar(2.);
 }
 
@@ -36,7 +36,7 @@ struct BasicTestModel : public ADModel<Scalar> {
 
     // Evaluate the function
     ADVector function(const ADVector& input) const override {
-        return evaluate_basic<ADScalar>(input);
+        return evaluate<ADScalar>(input);
     }
 };
 
@@ -87,7 +87,7 @@ TEST_F(BasicTestModelFixture, Dimensions) {
 TEST_F(BasicTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
 
-    Vector output_expected = evaluate_basic<Scalar>(input);
+    Vector output_expected = evaluate<Scalar>(input);
     Vector output_actual = function_ptr_->evaluate(input);
     ASSERT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
