@@ -62,25 +62,25 @@ class BasicTestModelFixture : public ::testing::Test {
 };
 
 TEST_F(BasicTestModelFixture, CreatesSharedLib) {
-    ASSERT_TRUE(model_ptr_->library_exists())
+    EXPECT_TRUE(model_ptr_->library_exists())
         << "Shared library file not found.";
 }
 
 TEST_F(BasicTestModelFixture, Dimensions) {
     // test that the model shape is correct
-    ASSERT_EQ(function_ptr_->get_input_size(), NUM_INPUT)
+    EXPECT_EQ(function_ptr_->get_input_size(), NUM_INPUT)
         << "Input size is incorrect.";
-    ASSERT_EQ(function_ptr_->get_output_size(), NUM_OUTPUT)
+    EXPECT_EQ(function_ptr_->get_output_size(), NUM_OUTPUT)
         << "Output size is incorrect.";
 
     // generate an input with a size too large
-    Vector x = Vector::Ones(NUM_INPUT + 1);
+    Vector input = Vector::Ones(NUM_INPUT + 1);
 
-    ASSERT_THROW(function_ptr_->evaluate(x), std::runtime_error)
+    EXPECT_THROW(function_ptr_->evaluate(input), std::runtime_error)
         << "Evaluate with input of wrong size did not throw.";
-    ASSERT_THROW(function_ptr_->jacobian(x), std::runtime_error)
+    EXPECT_THROW(function_ptr_->jacobian(input), std::runtime_error)
         << "Jacobian with input of wrong size did not throw.";
-    ASSERT_THROW(function_ptr_->hessian(x, 0), std::runtime_error)
+    EXPECT_THROW(function_ptr_->hessian(input, 0), std::runtime_error)
         << "Hessian with input of wrong size did not throw.";
 }
 
@@ -89,7 +89,7 @@ TEST_F(BasicTestModelFixture, Evaluation) {
 
     Vector output_expected = evaluate<Scalar>(input);
     Vector output_actual = function_ptr_->evaluate(input);
-    ASSERT_TRUE(output_actual.isApprox(output_expected))
+    EXPECT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
 }
 
@@ -101,7 +101,7 @@ TEST_F(BasicTestModelFixture, Jacobian) {
     J_expected.diagonal() << 2, 2, 2;
     Matrix J_actual = function_ptr_->jacobian(input);
 
-    ASSERT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
+    EXPECT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
 }
 
 TEST_F(BasicTestModelFixture, Hessian) {
@@ -113,13 +113,13 @@ TEST_F(BasicTestModelFixture, Hessian) {
     Matrix H1_actual = function_ptr_->hessian(input, 1);
     Matrix H2_actual = function_ptr_->hessian(input, 2);
 
-    ASSERT_TRUE(H0_actual.isApprox(H_expected))
+    EXPECT_TRUE(H0_actual.isApprox(H_expected))
         << "Hessian for dim 0 is incorrect.";
-    ASSERT_TRUE(H1_actual.isApprox(H_expected))
+    EXPECT_TRUE(H1_actual.isApprox(H_expected))
         << "Hessian for dim 1 is incorrect.";
-    ASSERT_TRUE(H2_actual.isApprox(H_expected))
+    EXPECT_TRUE(H2_actual.isApprox(H_expected))
         << "Hessian for dim 2 is incorrect.";
 
-    ASSERT_THROW(function_ptr_->hessian(input, NUM_OUTPUT), std::runtime_error)
+    EXPECT_THROW(function_ptr_->hessian(input, NUM_OUTPUT), std::runtime_error)
         << "Hessian with too-large output_dim did not throw.";
 }

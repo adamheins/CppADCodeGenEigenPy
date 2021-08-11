@@ -72,13 +72,13 @@ TEST_F(ParameterizedTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
     Vector parameters = Vector::Ones(NUM_INPUT);
 
-    Vector y_expected = evaluate<Scalar>(input, parameters);
-    Vector y_actual = function_ptr_->evaluate(input, parameters);
-    ASSERT_TRUE(y_actual.isApprox(y_expected))
+    Vector output_expected = evaluate<Scalar>(input, parameters);
+    Vector output_actual = function_ptr_->evaluate(input, parameters);
+    EXPECT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
 
     // if I forget to pass the parameters, I should get a runtime error
-    ASSERT_THROW(function_ptr_->evaluate(input), std::runtime_error)
+    EXPECT_THROW(function_ptr_->evaluate(input), std::runtime_error)
         << "Missing parameters did not throw error.";
 }
 
@@ -91,9 +91,9 @@ TEST_F(ParameterizedTestModelFixture, Jacobian) {
     P.diagonal() << parameters;
     Matrix J_expected = input.transpose() * P;
     Matrix J_actual = function_ptr_->jacobian(input, parameters);
-    ASSERT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
+    EXPECT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
 
-    ASSERT_THROW(function_ptr_->jacobian(input), std::runtime_error)
+    EXPECT_THROW(function_ptr_->jacobian(input), std::runtime_error)
         << "Missing parameters did not throw error.";
 }
 
@@ -104,7 +104,7 @@ TEST_F(ParameterizedTestModelFixture, Hessian) {
     Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
     H_expected.diagonal() << parameters;
     Matrix H_actual = function_ptr_->hessian(input, parameters, 0);
-    ASSERT_TRUE(H_actual.isApprox(H_expected)) << "Hessian is incorrect.";
-    ASSERT_THROW(function_ptr_->hessian(input, 0), std::runtime_error)
+    EXPECT_TRUE(H_actual.isApprox(H_expected)) << "Hessian is incorrect.";
+    EXPECT_THROW(function_ptr_->hessian(input, 0), std::runtime_error)
         << "Missing parameters did not throw error.";
 }

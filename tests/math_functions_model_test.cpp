@@ -67,7 +67,7 @@ TEST_F(MathFunctionsTestModelFixture, Evaluation) {
     Vector output_expected = evaluate<Scalar>(input);
     Vector output_actual = function_ptr_->evaluate(input);
 
-    ASSERT_TRUE(output_actual.isApprox(output_expected))
+    EXPECT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
 }
 
@@ -82,7 +82,7 @@ TEST_F(MathFunctionsTestModelFixture, Jacobian) {
     // clang-format on
     Matrix J_actual = function_ptr_->jacobian(input);
 
-    ASSERT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
+    EXPECT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
 }
 
 TEST_F(MathFunctionsTestModelFixture, Hessian) {
@@ -105,10 +105,10 @@ TEST_F(MathFunctionsTestModelFixture, Hessian) {
     Matrix H1_actual = function_ptr_->hessian(input, 1);
     Matrix H2_actual = function_ptr_->hessian(input, 2);
 
-    ASSERT_TRUE(H0_actual.isApprox(H0_expected))
+    EXPECT_TRUE(H0_actual.isApprox(H0_expected))
         << "Hessian for dim 0 is incorrect.";
-    ASSERT_TRUE(H1_actual.isApprox(H1_expected))
+    EXPECT_TRUE(H1_actual.isApprox(H1_expected))
         << "Hessian for dim 1 is incorrect.";
-    ASSERT_TRUE(H2_actual.isApprox(H2_expected))
+    EXPECT_TRUE(H2_actual.isApprox(H2_expected))
         << "Hessian for dim 2 is incorrect.";
 }
