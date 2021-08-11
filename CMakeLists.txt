@@ -46,6 +46,7 @@ add_executable(
   model_tests
   tests/basic_model_test.cpp
   tests/parameterized_model_test.cpp
+  tests/math_functions_model_test.cpp
 )
 target_include_directories(model_tests PUBLIC include)
 target_link_libraries(

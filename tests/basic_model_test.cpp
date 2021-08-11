@@ -18,7 +18,7 @@ using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 // Just multiply input vector by 2.
 template <typename Scalar>
-Vector<Scalar> evaluate(const Vector<Scalar>& input) {
+Vector<Scalar> evaluate_basic(const Vector<Scalar>& input) {
     return input * Scalar(2.);
 }
 
@@ -36,7 +36,7 @@ struct BasicTestModel : public ADModel<Scalar> {
 
     // Evaluate the function
     ADVector function(const ADVector& input) const override {
-        return evaluate<ADScalar>(input);
+        return evaluate_basic<ADScalar>(input);
     }
 };
 
@@ -87,7 +87,7 @@ TEST_F(BasicTestModelFixture, Dimensions) {
 TEST_F(BasicTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
 
-    Vector output_expected = evaluate<Scalar>(input);
+    Vector output_expected = evaluate_basic<Scalar>(input);
     Vector output_actual = function_ptr_->evaluate(input);
     ASSERT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
@@ -107,7 +107,19 @@ TEST_F(BasicTestModelFixture, Jacobian) {
 TEST_F(BasicTestModelFixture, Hessian) {
     Vector input = Vector::Ones(NUM_INPUT);
 
+    // Hessian of all output dimensions should be zero
     Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
-    Matrix H_actual = function_ptr_->hessian(input, 0);  // all should be zero
-    ASSERT_TRUE(H_actual.isApprox(H_expected)) << "Hessian is incorrect.";
+    Matrix H0_actual = function_ptr_->hessian(input, 0);
+    Matrix H1_actual = function_ptr_->hessian(input, 1);
+    Matrix H2_actual = function_ptr_->hessian(input, 2);
+
+    ASSERT_TRUE(H0_actual.isApprox(H_expected))
+        << "Hessian for dim 0 is incorrect.";
+    ASSERT_TRUE(H1_actual.isApprox(H_expected))
+        << "Hessian for dim 1 is incorrect.";
+    ASSERT_TRUE(H2_actual.isApprox(H_expected))
+        << "Hessian for dim 2 is incorrect.";
+
+    ASSERT_THROW(function_ptr_->hessian(input, NUM_OUTPUT), std::runtime_error)
+        << "Hessian with too-large output_dim did not throw.";
 }

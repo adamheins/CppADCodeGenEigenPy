@@ -69,9 +69,20 @@ typename ADFunction<Scalar>::Matrix ADFunction<Scalar>::hessian(
             "Hessian is not available: compiled model must be "
             "second-order.");
     }
+    if (output_dim >= output_size_) {
+        throw std::runtime_error("Specified output dimension for Hessian is " +
+                                 std::to_string(output_dim) +
+                                 ", but model has only " +
+                                 std::to_string(output_size_) + " outputs.");
+    }
     check_input_size(input.size());
 
-    Vector H_vec = model_->template Hessian<Vector>(input, output_dim);
+    // Need to use the overload of the Hessian function that accepts a weight
+    // vector w. Otherwise, CppADCodeGen creates a w vector but does not
+    // initialize it to zero, which can cause errors.
+    Vector w = Vector::Zero(output_size_);
+    w(output_dim) = 1.0;
+    Vector H_vec = model_->template Hessian<Vector>(input, w);
     Eigen::Map<Matrix> H(H_vec.data(), input_size_, input_size_);
     assert(H.allFinite());
     return H;

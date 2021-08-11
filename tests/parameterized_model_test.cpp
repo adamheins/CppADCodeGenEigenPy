@@ -19,7 +19,7 @@ using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 // Parameterized sum of squares.
 template <typename Scalar>
-Vector<Scalar> evaluate(const Vector<Scalar>& input,
+Vector<Scalar> evaluate_with_parameters(const Vector<Scalar>& input,
                         const Vector<Scalar>& parameters) {
     Vector<Scalar> output(NUM_OUTPUT);
     for (int i = 0; i < NUM_INPUT; ++i) {
@@ -46,7 +46,7 @@ struct ParameterizedTestModel : public ADModel<Scalar> {
     // Evaluate the function
     ADVector function(const ADVector& input,
                       const ADVector& parameters) const override {
-        return evaluate<ADScalar>(input, parameters);
+        return evaluate_with_parameters<ADScalar>(input, parameters);
     }
 };
 
@@ -72,7 +72,7 @@ TEST_F(ParameterizedTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
     Vector parameters = Vector::Ones(NUM_INPUT);
 
-    Vector y_expected = evaluate<Scalar>(input, parameters);
+    Vector y_expected = evaluate_with_parameters<Scalar>(input, parameters);
     Vector y_actual = function_ptr_->evaluate(input, parameters);
     ASSERT_TRUE(y_actual.isApprox(y_expected))
         << "Function evaluation is incorrect.";
