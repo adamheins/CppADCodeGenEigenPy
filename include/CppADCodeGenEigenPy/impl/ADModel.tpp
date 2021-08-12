@@ -1,12 +1,12 @@
 #pragma once
 
 template <typename Scalar>
-ADModel<Scalar>::ADModel(std::string model_name, std::string folder_name,
+ADModel<Scalar>::ADModel(std::string model_name, std::string directory_name,
                          ADOrder order)
     : model_name_(model_name),
-      folder_name_(folder_name),
+      directory_name_(directory_name),
       order_(order),
-      library_generic_path_(folder_name + "/lib" + model_name) {}
+      library_generic_path_(directory_name + "/lib" + model_name) {}
 
 template <typename Scalar>
 bool ADModel<Scalar>::library_exists() const {
@@ -32,7 +32,7 @@ std::string ADModel<Scalar>::get_model_name() const {
 template <typename Scalar>
 void ADModel<Scalar>::compile(bool verbose,
                               std::vector<std::string> compile_flags) const {
-    boost::filesystem::create_directories(folder_name_);
+    boost::filesystem::create_directories(directory_name_);
 
     ADVector x = input();
     ADVector p = parameters();

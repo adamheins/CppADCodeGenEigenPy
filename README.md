@@ -1,6 +1,6 @@
 # CppADCodeGenEigenPy
 
-CppADCodeGen meets pybind11 with an Eigen interface.
+CppADCodeGen with an easy Eigen interface and Python bindings.
 
 This project has been tested on Ubuntu 16.04. It should work on more recent
 Ubuntu versions, and likely works on other *nix systems as well.
@@ -17,7 +17,13 @@ autodiff's JIT every time I run the script if nothing has changed.
 This project provides a simple interface to CppADCodeGen to define the required
 function in C++, which is then compiled (along with its automatically-computed
 derivates) into a dynamic library. This dynamic library can then be easily used
-from C++ or imported into Python.
+from C++ or imported into Python via pybind11-based bindings.
+
+CppADCodeGenEigenPy is built around two classes. The first is the `ADModel`,
+which defines the function to be auto-differentiated. It is compiled into a
+dynamic library which can then be loaded by the second class, the regular
+`Model`. The `Model` can evaluate the function itself as well as its first and
+second-order derivatives.
 
 ## Install
 
@@ -27,7 +33,7 @@ First ensure you have the required dependencies:
 * [Boost](https://www.boost.org/) (tested with version 1.58)
 * [CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)
 
-Then clone and built CppADCodeGenEigenPy:
+Then clone and build CppADCodeGenEigenPy:
 ```
 git clone ...
 cd CppADCodeGenEigenPy
