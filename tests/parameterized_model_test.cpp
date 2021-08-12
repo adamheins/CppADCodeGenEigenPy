@@ -2,8 +2,8 @@
 
 #include <Eigen/Eigen>
 
-#include <CppADCodeGenEigenPy/ADFunction.h>
 #include <CppADCodeGenEigenPy/ADModel.h>
+#include <CppADCodeGenEigenPy/Model.h>
 
 using namespace CppADCodeGenEigenPy;
 
@@ -54,20 +54,20 @@ struct ParameterizedTestModel : public ADModel<Scalar> {
 
 class ParameterizedTestModelFixture : public ::testing::Test {
    protected:
-    using Vector = ADFunction<Scalar>::Vector;
-    using Matrix = ADFunction<Scalar>::Matrix;
+    using Vector = Model<Scalar>::Vector;
+    using Matrix = Model<Scalar>::Matrix;
 
     void SetUp() override {
-        model_ptr_.reset(new ParameterizedTestModel<Scalar>(
+        ad_model_ptr_.reset(new ParameterizedTestModel<Scalar>(
             MODEL_NAME, FOLDER_NAME, ADOrder::Second));
-        model_ptr_->compile();
-        function_ptr_.reset(
-            new ADFunction<Scalar>(model_ptr_->get_model_name(),
-                                   model_ptr_->get_library_generic_path()));
+        ad_model_ptr_->compile();
+        model_ptr_.reset(
+            new Model<Scalar>(ad_model_ptr_->get_model_name(),
+                              ad_model_ptr_->get_library_generic_path()));
     }
 
-    std::unique_ptr<ADModel<Scalar>> model_ptr_;
-    std::unique_ptr<ADFunction<Scalar>> function_ptr_;
+    std::unique_ptr<ADModel<Scalar>> ad_model_ptr_;
+    std::unique_ptr<Model<Scalar>> model_ptr_;
 };
 
 TEST_F(ParameterizedTestModelFixture, Evaluation) {
@@ -75,12 +75,12 @@ TEST_F(ParameterizedTestModelFixture, Evaluation) {
     Vector parameters = Vector::Ones(NUM_INPUT);
 
     Vector output_expected = evaluate<Scalar>(input, parameters);
-    Vector output_actual = function_ptr_->evaluate(input, parameters);
+    Vector output_actual = model_ptr_->evaluate(input, parameters);
     EXPECT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
 
     // if I forget to pass the parameters, I should get a runtime error
-    EXPECT_THROW(function_ptr_->evaluate(input), std::runtime_error)
+    EXPECT_THROW(model_ptr_->evaluate(input), std::runtime_error)
         << "Missing parameters did not throw error.";
 }
 
@@ -92,10 +92,10 @@ TEST_F(ParameterizedTestModelFixture, Jacobian) {
     Matrix P = Matrix::Zero(NUM_INPUT, NUM_INPUT);
     P.diagonal() << parameters;
     Matrix J_expected = input.transpose() * P;
-    Matrix J_actual = function_ptr_->jacobian(input, parameters);
+    Matrix J_actual = model_ptr_->jacobian(input, parameters);
     EXPECT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
 
-    EXPECT_THROW(function_ptr_->jacobian(input), std::runtime_error)
+    EXPECT_THROW(model_ptr_->jacobian(input), std::runtime_error)
         << "Missing parameters did not throw error.";
 }
 
@@ -105,8 +105,8 @@ TEST_F(ParameterizedTestModelFixture, Hessian) {
 
     Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
     H_expected.diagonal() << parameters;
-    Matrix H_actual = function_ptr_->hessian(input, parameters, 0);
+    Matrix H_actual = model_ptr_->hessian(input, parameters, 0);
     EXPECT_TRUE(H_actual.isApprox(H_expected)) << "Hessian is incorrect.";
-    EXPECT_THROW(function_ptr_->hessian(input, 0), std::runtime_error)
+    EXPECT_THROW(model_ptr_->hessian(input, 0), std::runtime_error)
         << "Missing parameters did not throw error.";
 }

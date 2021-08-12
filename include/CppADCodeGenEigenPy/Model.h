@@ -2,21 +2,19 @@
 
 #include <Eigen/Eigen>
 #include <cppad/cg.hpp>
-#include <cppad/example/cppad_eigen.hpp>
-#include <iostream>
 #include <string>
 
 namespace CppADCodeGenEigenPy {
 
 template <typename Scalar>
-class ADFunction {
+class Model {
    public:
     using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
     using Matrix =
         Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-    ADFunction(const std::string& model_name,
-               const std::string& library_generic_path);
+    Model(const std::string& model_name,
+          const std::string& library_generic_path);
 
     Vector evaluate(const Eigen::Ref<const Vector>& input) const;
 
@@ -54,8 +52,8 @@ class ADFunction {
     // user shouldn't have passed parameters
     void check_input_size_with_params(size_t input_size,
                                       size_t param_size) const;
-};  // class ADFunction
+};  // class Model
 
-#include "impl/ADFunction.tpp"
+#include "impl/Model.tpp"
 
 }  // namespace CppADCodeGenEigenPy

@@ -2,8 +2,8 @@
 
 #include <Eigen/Eigen>
 
-#include <CppADCodeGenEigenPy/ADFunction.h>
 #include <CppADCodeGenEigenPy/ADModel.h>
+#include <CppADCodeGenEigenPy/Model.h>
 
 using namespace CppADCodeGenEigenPy;
 
@@ -47,27 +47,27 @@ struct MathFunctionsTestModel : public ADModel<Scalar> {
 
 class MathFunctionsTestModelFixture : public ::testing::Test {
    protected:
-    using Vector = ADFunction<Scalar>::Vector;
-    using Matrix = ADFunction<Scalar>::Matrix;
+    using Vector = Model<Scalar>::Vector;
+    using Matrix = Model<Scalar>::Matrix;
 
     void SetUp() override {
-        model_ptr_.reset(new MathFunctionsTestModel<Scalar>(
+        ad_model_ptr_.reset(new MathFunctionsTestModel<Scalar>(
             MODEL_NAME, FOLDER_NAME, ADOrder::Second));
-        model_ptr_->compile();
-        function_ptr_.reset(
-            new ADFunction<Scalar>(model_ptr_->get_model_name(),
-                                   model_ptr_->get_library_generic_path()));
+        ad_model_ptr_->compile();
+        model_ptr_.reset(
+            new Model<Scalar>(ad_model_ptr_->get_model_name(),
+                              ad_model_ptr_->get_library_generic_path()));
     }
 
-    std::unique_ptr<ADModel<Scalar>> model_ptr_;
-    std::unique_ptr<ADFunction<Scalar>> function_ptr_;
+    std::unique_ptr<ADModel<Scalar>> ad_model_ptr_;
+    std::unique_ptr<Model<Scalar>> model_ptr_;
 };
 
 TEST_F(MathFunctionsTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
 
     Vector output_expected = evaluate<Scalar>(input);
-    Vector output_actual = function_ptr_->evaluate(input);
+    Vector output_actual = model_ptr_->evaluate(input);
 
     EXPECT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
@@ -82,7 +82,7 @@ TEST_F(MathFunctionsTestModelFixture, Jacobian) {
                   0, 0, 0.5 / sqrt(input(2)),
                   2 * input.transpose();
     // clang-format on
-    Matrix J_actual = function_ptr_->jacobian(input);
+    Matrix J_actual = model_ptr_->jacobian(input);
 
     EXPECT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
 }
@@ -103,9 +103,9 @@ TEST_F(MathFunctionsTestModelFixture, Hessian) {
 
     Matrix H2_expected = 2 * Matrix::Identity(NUM_INPUT, NUM_INPUT);
 
-    Matrix H0_actual = function_ptr_->hessian(input, 0);
-    Matrix H1_actual = function_ptr_->hessian(input, 1);
-    Matrix H2_actual = function_ptr_->hessian(input, 2);
+    Matrix H0_actual = model_ptr_->hessian(input, 0);
+    Matrix H1_actual = model_ptr_->hessian(input, 1);
+    Matrix H2_actual = model_ptr_->hessian(input, 2);
 
     EXPECT_TRUE(H0_actual.isApprox(H0_expected))
         << "Hessian for dim 0 is incorrect.";

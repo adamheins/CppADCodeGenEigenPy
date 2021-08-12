@@ -2,8 +2,8 @@
 
 #include <Eigen/Eigen>
 
-#include <CppADCodeGenEigenPy/ADFunction.h>
 #include <CppADCodeGenEigenPy/ADModel.h>
+#include <CppADCodeGenEigenPy/Model.h>
 
 using namespace CppADCodeGenEigenPy;
 
@@ -44,45 +44,45 @@ struct BasicTestModel : public ADModel<Scalar> {
 
 class BasicTestModelFixture : public ::testing::Test {
    protected:
-    using Vector = ADFunction<Scalar>::Vector;
-    using Matrix = ADFunction<Scalar>::Matrix;
+    using Vector = Model<Scalar>::Vector;
+    using Matrix = Model<Scalar>::Matrix;
 
     void SetUp() override {
-        model_ptr_.reset(new BasicTestModel<Scalar>(MODEL_NAME, FOLDER_NAME,
-                                                    ADOrder::Second));
-        model_ptr_->compile();
-        function_ptr_.reset(
-            new ADFunction<Scalar>(model_ptr_->get_model_name(),
-                                   model_ptr_->get_library_generic_path()));
+        ad_model_ptr_.reset(new BasicTestModel<Scalar>(MODEL_NAME, FOLDER_NAME,
+                                                       ADOrder::Second));
+        ad_model_ptr_->compile();
+        model_ptr_.reset(
+            new Model<Scalar>(ad_model_ptr_->get_model_name(),
+                              ad_model_ptr_->get_library_generic_path()));
     }
 
     // TODO we could delete the .so afterward
     // void TearDown() override {}
 
-    std::unique_ptr<ADModel<Scalar>> model_ptr_;
-    std::unique_ptr<ADFunction<Scalar>> function_ptr_;
+    std::unique_ptr<ADModel<Scalar>> ad_model_ptr_;
+    std::unique_ptr<Model<Scalar>> model_ptr_;
 };
 
 TEST_F(BasicTestModelFixture, CreatesSharedLib) {
-    EXPECT_TRUE(model_ptr_->library_exists())
+    EXPECT_TRUE(ad_model_ptr_->library_exists())
         << "Shared library file not found.";
 }
 
 TEST_F(BasicTestModelFixture, Dimensions) {
     // test that the model shape is correct
-    EXPECT_EQ(function_ptr_->get_input_size(), NUM_INPUT)
+    EXPECT_EQ(model_ptr_->get_input_size(), NUM_INPUT)
         << "Input size is incorrect.";
-    EXPECT_EQ(function_ptr_->get_output_size(), NUM_OUTPUT)
+    EXPECT_EQ(model_ptr_->get_output_size(), NUM_OUTPUT)
         << "Output size is incorrect.";
 
     // generate an input with a size too large
     Vector input = Vector::Ones(NUM_INPUT + 1);
 
-    EXPECT_THROW(function_ptr_->evaluate(input), std::runtime_error)
+    EXPECT_THROW(model_ptr_->evaluate(input), std::runtime_error)
         << "Evaluate with input of wrong size did not throw.";
-    EXPECT_THROW(function_ptr_->jacobian(input), std::runtime_error)
+    EXPECT_THROW(model_ptr_->jacobian(input), std::runtime_error)
         << "Jacobian with input of wrong size did not throw.";
-    EXPECT_THROW(function_ptr_->hessian(input, 0), std::runtime_error)
+    EXPECT_THROW(model_ptr_->hessian(input, 0), std::runtime_error)
         << "Hessian with input of wrong size did not throw.";
 }
 
@@ -90,7 +90,7 @@ TEST_F(BasicTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
 
     Vector output_expected = evaluate<Scalar>(input);
-    Vector output_actual = function_ptr_->evaluate(input);
+    Vector output_actual = model_ptr_->evaluate(input);
     EXPECT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
 }
@@ -101,7 +101,7 @@ TEST_F(BasicTestModelFixture, Jacobian) {
     Matrix J_expected(NUM_OUTPUT, NUM_INPUT);
     J_expected.setZero();
     J_expected.diagonal() << 2, 2, 2;
-    Matrix J_actual = function_ptr_->jacobian(input);
+    Matrix J_actual = model_ptr_->jacobian(input);
 
     EXPECT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
 }
@@ -111,9 +111,9 @@ TEST_F(BasicTestModelFixture, Hessian) {
 
     // Hessian of all output dimensions should be zero
     Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
-    Matrix H0_actual = function_ptr_->hessian(input, 0);
-    Matrix H1_actual = function_ptr_->hessian(input, 1);
-    Matrix H2_actual = function_ptr_->hessian(input, 2);
+    Matrix H0_actual = model_ptr_->hessian(input, 0);
+    Matrix H1_actual = model_ptr_->hessian(input, 1);
+    Matrix H2_actual = model_ptr_->hessian(input, 2);
 
     EXPECT_TRUE(H0_actual.isApprox(H_expected))
         << "Hessian for dim 0 is incorrect.";
@@ -122,6 +122,6 @@ TEST_F(BasicTestModelFixture, Hessian) {
     EXPECT_TRUE(H2_actual.isApprox(H_expected))
         << "Hessian for dim 2 is incorrect.";
 
-    EXPECT_THROW(function_ptr_->hessian(input, NUM_OUTPUT), std::runtime_error)
+    EXPECT_THROW(model_ptr_->hessian(input, NUM_OUTPUT), std::runtime_error)
         << "Hessian with too-large output_dim did not throw.";
 }

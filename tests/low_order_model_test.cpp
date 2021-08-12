@@ -2,8 +2,8 @@
 
 #include <Eigen/Eigen>
 
-#include <CppADCodeGenEigenPy/ADFunction.h>
 #include <CppADCodeGenEigenPy/ADModel.h>
+#include <CppADCodeGenEigenPy/Model.h>
 
 using namespace CppADCodeGenEigenPy;
 
@@ -34,28 +34,28 @@ struct LowOrderTestModel : public ADModel<Scalar> {
 
 class LowOrderTestModelFixture : public ::testing::Test {
    protected:
-    using Vector = ADFunction<Scalar>::Vector;
-    using Matrix = ADFunction<Scalar>::Matrix;
+    using Vector = Model<Scalar>::Vector;
+    using Matrix = Model<Scalar>::Matrix;
 
     void SetUp() override {
-        model_ptr_.reset(new LowOrderTestModel<Scalar>(MODEL_NAME, FOLDER_NAME,
-                                                       ADOrder::Zero));
-        model_ptr_->compile();
-        function_ptr_.reset(
-            new ADFunction<Scalar>(model_ptr_->get_model_name(),
-                                   model_ptr_->get_library_generic_path()));
+        ad_model_ptr_.reset(new LowOrderTestModel<Scalar>(
+            MODEL_NAME, FOLDER_NAME, ADOrder::Zero));
+        ad_model_ptr_->compile();
+        model_ptr_.reset(
+            new Model<Scalar>(ad_model_ptr_->get_model_name(),
+                              ad_model_ptr_->get_library_generic_path()));
     }
 
-    std::unique_ptr<ADModel<Scalar>> model_ptr_;
-    std::unique_ptr<ADFunction<Scalar>> function_ptr_;
+    std::unique_ptr<ADModel<Scalar>> ad_model_ptr_;
+    std::unique_ptr<Model<Scalar>> model_ptr_;
 };
 
 TEST_F(LowOrderTestModelFixture, ThrowsOnJacobianHessian) {
     Vector input = Vector::Ones(NUM_INPUT);
 
-    EXPECT_NO_THROW(function_ptr_->evaluate(input)) << "Evaluate threw.";
-    EXPECT_THROW(function_ptr_->jacobian(input), std::runtime_error)
+    EXPECT_NO_THROW(model_ptr_->evaluate(input)) << "Evaluate threw.";
+    EXPECT_THROW(model_ptr_->jacobian(input), std::runtime_error)
         << "Jacobian did not throw.";
-    EXPECT_THROW(function_ptr_->hessian(input, 0), std::runtime_error)
+    EXPECT_THROW(model_ptr_->hessian(input, 0), std::runtime_error)
         << "Hessian did not throw.";
 }
