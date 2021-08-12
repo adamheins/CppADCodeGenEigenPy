@@ -5,6 +5,8 @@
 #include <CppADCodeGenEigenPy/ADFunction.h>
 #include <CppADCodeGenEigenPy/ADModel.h>
 
+using namespace CppADCodeGenEigenPy;
+
 using Scalar = double;
 
 static const std::string MODEL_NAME = "ParameterizedTestModel";
@@ -20,7 +22,7 @@ using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 // Parameterized sum of squares.
 template <typename Scalar>
 static Vector<Scalar> evaluate(const Vector<Scalar>& input,
-                        const Vector<Scalar>& parameters) {
+                               const Vector<Scalar>& parameters) {
     Vector<Scalar> output(NUM_OUTPUT);
     for (int i = 0; i < NUM_INPUT; ++i) {
         output(0) += 0.5 * parameters(i) * input(i) * input(i);

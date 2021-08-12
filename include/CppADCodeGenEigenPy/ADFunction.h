@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+namespace CppADCodeGenEigenPy {
+
 template <typename Scalar>
 class ADFunction {
    public:
@@ -52,6 +54,8 @@ class ADFunction {
     // user shouldn't have passed parameters
     void check_input_size_with_params(size_t input_size,
                                       size_t param_size) const;
-};
+};  // class ADFunction
 
 #include "impl/ADFunction.tpp"
+
+}  // namespace CppADCodeGenEigenPy

@@ -5,6 +5,8 @@
 #include <CppADCodeGenEigenPy/ADFunction.h>
 #include <CppADCodeGenEigenPy/ADModel.h>
 
+using namespace CppADCodeGenEigenPy;
+
 using Scalar = double;
 
 static const std::string MODEL_NAME = "BasicTestModel";

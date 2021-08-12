@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+namespace CppADCodeGenEigenPy {
+
 // Derivative order
 enum class ADOrder { Zero, First, Second };
 
@@ -39,6 +41,7 @@ class ADModel {
                  std::vector<std::string> compile_flags = {
                      "-O3", "-march=native", "-mtune=native",
                      "-ffast-math"}) const;
+
    protected:
     virtual ADVector function(const ADVector& x) const;
 
@@ -52,6 +55,8 @@ class ADModel {
     std::string folder_name_;
     std::string library_generic_path_;
     ADOrder order_;
-};
+};  // class ADModel
 
 #include "impl/ADModel.tpp"
+
+}  // namespace CppADCodeGenEigenPy
