@@ -49,6 +49,13 @@ sudo cmake --install build
 
 # run tests
 cd build && ctest
+
+# build and install the bindings
+# this requires pip 10+ in order to parse pyproject.toml
+python -m pip install .
+
+# if you also want the test dependencies
+python -m pip install ".[test]"
 ```
 
 ## Example
