@@ -34,7 +34,7 @@ pybind11_add_module(${PROJECT_NAME} src/bindings.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
 
 # install the module containing the bindings
-install(TARGETS ${PROJECT_NAME} DESTINATION ${Python3_SITELIB})
+# install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # install project header files
 install(DIRECTORY include/ DESTINATION include)
