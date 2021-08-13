@@ -44,10 +44,10 @@ enable_testing()
 
 add_executable(
   model_tests
-  tests/basic_model_test.cpp
-  tests/parameterized_model_test.cpp
-  tests/math_functions_model_test.cpp
-  tests/low_order_model_test.cpp
+  tests/cpp/basic_model_test.cpp
+  tests/cpp/parameterized_model_test.cpp
+  tests/cpp/math_functions_model_test.cpp
+  tests/cpp/low_order_model_test.cpp
 )
 target_include_directories(model_tests PUBLIC include)
 target_link_libraries(
