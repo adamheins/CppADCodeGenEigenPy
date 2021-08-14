@@ -6,18 +6,13 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Note that cmake 3.12+ is required to find Python
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+# find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(Boost COMPONENTS filesystem REQUIRED)
 
-include(FetchContent)
+# install project header files
+install(DIRECTORY include/ DESTINATION include)
 
-# get pybind11 from github
-FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG        v2.7.1
-)
-FetchContent_MakeAvailable(pybind11)
+include(FetchContent)
 
 # get googletest from github
 FetchContent_Declare(
@@ -28,16 +23,6 @@ FetchContent_Declare(
 # avoid installing googletest along with this project
 option(INSTALL_GTEST "Enable installation of googletest." OFF)
 FetchContent_MakeAvailable(googletest)
-
-# generate the Python bindings
-pybind11_add_module(${PROJECT_NAME} src/bindings.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC include/)
-
-# install the module containing the bindings
-# install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-
-# install project header files
-install(DIRECTORY include/ DESTINATION include)
 
 # testing
 enable_testing()

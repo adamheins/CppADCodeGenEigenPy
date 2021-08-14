@@ -31,31 +31,37 @@ First ensure you have the required dependencies:
 * a compiler with C++11 support
 * [cmake](https://cmake.org/) version 3.12+
 * [Boost](https://www.boost.org/) (tested with version 1.58)
+* [Eigen](https://eigen.tuxfamily.org/) version 3.3+
 * [CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)
 
-Then clone and build CppADCodeGenEigenPy:
+Clone CppADCodeGenEigenPy:
 ```
-git clone ...
+git clone https://github.com/adamheins/CppADCodeGenEigenPy
 cd CppADCodeGenEigenPy
+```
+
+The main C++ part of CppADCodeGenEigenPy uses cmake. The library itself is
+header-only, so you need only do:
+```
 mkdir build
 cmake -S . -B build
-cmake --build build
-
-# headers are installed to the usual system-wide include location
-# the python module is installed to whichever Python is active
-sudo make install
-# or
 sudo cmake --install build
+```
 
-# run tests
-cd build && ctest
+If you also want to build CppADCodeGenEigenPy's tests, run
+```
+cmake --build build
+```
+and then run them:
+```
+cd build
+ctest
+```
 
-# build and install the bindings
-# this requires pip 10+ in order to parse pyproject.toml
+To build and install the Python bindings, `pip` is used. Note that `pip`
+version 10+ is required in order to parse `pyproject.toml`. Run
+```
 python -m pip install .
-
-# if you also want the test dependencies
-python -m pip install ".[test]"
 ```
 
 ## Example
@@ -67,4 +73,4 @@ TODO
 
 ## License
 
-TODO
+MIT
