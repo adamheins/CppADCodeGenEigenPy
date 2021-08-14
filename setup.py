@@ -19,7 +19,7 @@ ext_modules = [
 setup(
     name="CppADCodeGenEigenPy",
     version="0.1",
-    description="",
+    description="CppADCodeGen with an Eigen interface and Python bindings.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Adam Heins",
