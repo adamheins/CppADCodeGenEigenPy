@@ -1,38 +1,35 @@
 #pragma once
 
-template <typename Scalar>
-ADModel<Scalar>::ADModel(std::string model_name, std::string directory_name,
-                         ADOrder order)
-    : model_name_(model_name),
-      directory_name_(directory_name),
-      order_(order),
-      library_generic_path_(directory_name + "/lib" + model_name) {}
-
-template <typename Scalar>
-bool ADModel<Scalar>::library_exists() const {
-    return boost::filesystem::exists(get_library_real_path());
+std::string make_library_generic_path(const std::string& directory_name,
+                                      const std::string& model_name) {
+    return directory_name + "/lib" + model_name;
 }
 
-template <typename Scalar>
-std::string ADModel<Scalar>::get_library_real_path() const {
-    return get_library_generic_path() +
-           CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION;
+std::string make_library_real_path(const std::string& directory_name,
+                                   const std::string& model_name) {
+    std::string ext = CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION;
+    return make_library_generic_path(directory_name, model_name) + ext;
 }
 
-template <typename Scalar>
-std::string ADModel<Scalar>::get_library_generic_path() const {
-    return library_generic_path_;
-}
+// TODO why don't I let the user handle this? because its not easy to get the
+// path any more
+// template <typename Scalar>
+// void ADModel<Scalar>::compile_unless_exists(
+//     const std::string& model_name, const std::string& directory_name,
+//     bool verbose, std::vector<std::string> compile_flags) const {
+//     if (!boost::filesystem::exists(make_library_real_path())) {
+//         compile(model_name, directory_name, verbose, compile_flags);
+//     }
+//     if (verbose) {
+//         std::cout << "Library already exists. Skipping compile." << std::endl;
+//     }
+// }
 
 template <typename Scalar>
-std::string ADModel<Scalar>::get_model_name() const {
-    return model_name_;
-}
-
-template <typename Scalar>
-void ADModel<Scalar>::compile(bool verbose,
+void ADModel<Scalar>::compile(const std::string& model_name,
+                              const std::string& directory_name, bool verbose,
                               std::vector<std::string> compile_flags) const {
-    boost::filesystem::create_directories(directory_name_);
+    boost::filesystem::create_directories(directory_name);
 
     ADVector x = input();
     ADVector p = parameters();
@@ -52,18 +49,18 @@ void ADModel<Scalar>::compile(bool verbose,
 
     // generates source code
     // TODO support sparse Jacobian/Hessian
-    CppAD::cg::ModelCSourceGen<Scalar> source_gen(ad_func, model_name_);
-    if (order_ >= ADOrder::First) {
+    CppAD::cg::ModelCSourceGen<Scalar> source_gen(ad_func, model_name);
+    if (order_ >= DerivativeOrder::First) {
         source_gen.setCreateJacobian(true);
     }
-    if (order_ >= ADOrder::Second) {
+    if (order_ >= DerivativeOrder::Second) {
         source_gen.setCreateHessian(true);
     }
 
     CppAD::cg::ModelLibraryCSourceGen<Scalar> lib_source_gen(source_gen);
     CppAD::cg::GccCompiler<Scalar> compiler;
     CppAD::cg::DynamicModelLibraryProcessor<Scalar> lib_processor(
-        lib_source_gen, library_generic_path_);
+        lib_source_gen, make_library_generic_path());
 
     compiler.setCompileLibFlags(compile_flags);
     compiler.addCompileLibFlag("-shared");
@@ -73,8 +70,8 @@ void ADModel<Scalar>::compile(bool verbose,
     std::unique_ptr<CppAD::cg::DynamicLib<Scalar>> lib =
         lib_processor.createDynamicLibrary(compiler);
     if (verbose) {
-        std::cout << "Compiled library to " << get_library_real_path()
-                  << std::endl;
+        std::cout << "Compiled library for model " << model_name << " to "
+                  << make_library_real_path() << std::endl;
     }
 }
 

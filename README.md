@@ -12,6 +12,11 @@ compiled auto-differentiated code. Autodiff tools in Python often just-in-time
 compile the code rather than ahead-of-time compile it. I don't want to wait for
 autodiff's JIT every time I run the script if nothing has changed.
 
+This project was heavily inspired by larger frameworks that incorporate
+auto-diff functionality via CppADCodeGen for convenience; in particular, the
+[automatic_differentiation](https://github.com/leggedrobotics/ocs2/tree/main/ocs2_core/include/ocs2_core/automatic_differentiation)
+module from [OCS2](https://github.com/leggedrobotics/ocs2) was a big influence.
+
 ## How it works
 
 This project provides a simple interface to CppADCodeGen to define the required

@@ -9,7 +9,7 @@
 namespace CppADCodeGenEigenPy {
 
 /** Derivative order */
-enum class ADOrder { Zero, First, Second };
+enum class DerivativeOrder { Zero, First, Second };
 
 /** Abstract base class for a function to be auto-differentiated and compiled.
  *
@@ -19,18 +19,28 @@ enum class ADOrder { Zero, First, Second };
  *
  * @tparam Scalar  The scalar type to use. Typically float or double.
  */
-template <typename Scalar>
+template <typename Scalar, int InputDim = Eigen::Dynamic,
+          int OutputDim = Eigen::Dynamic, int ParamDim = Eigen::Dynamic>
 class ADModel {
    public:
-    using ADBase = CppAD::cg::CG<Scalar>;
+    using ADScalarBase = CppAD::cg::CG<Scalar>;
 
     /** Auto-diff scalar type. */
-    using ADScalar = CppAD::AD<ADBase>;
+    using ADScalar = CppAD::AD<ADScalarBase>;
 
-    /** Auto-diff vector type. */
+    /** Auto-diff input vector type. */
+    using ADInput = Eigen::Matrix<ADScalar, InputDim, 1>;
+
+    /** Auto-diff output vector type. */
+    using ADOutput = Eigen::Matrix<ADScalar, OutputDim, 1>;
+
+    /** Auto-diff parameter vector type. */
+    using ADParameters = Eigen::Matrix<ADScalar, ParamDim, 1>;
+
+    /** Auto-diff dynamic vector type. */
     using ADVector = Eigen::Matrix<ADScalar, Eigen::Dynamic, 1>;
 
-    /** Auto-diff matrix type. */
+    /** Auto-diff dynamic matrix type. */
     // Needs to be row major to interface with numpy
     using ADMatrix = Eigen::Matrix<ADScalar, Eigen::Dynamic, Eigen::Dynamic,
                                    Eigen::RowMajor>;
@@ -43,46 +53,25 @@ class ADModel {
      * @param[in] order           Order of derivatives to be taken. Zero
      *                            indicates no derivatives are computed.
      */
-    ADModel(std::string model_name, std::string directory_name,
-            ADOrder order = ADOrder::First);
-
-    /** Check if the dynamic library currently exists at the directory path
-     *  given in the constructor.
-     *
-     * @returns True if the library exists, false otherwise.
-     */
-    bool library_exists() const;
-
-    /** Get the full path of the dynamic library (even if it doesn't currently
-     *  exist), including the (platform-dependent) extension.
-     *
-     * @returns The library path including the extension.
-     */
-    std::string get_library_real_path() const;
-
-    /** Get the full path of the dynamic library (even if it doesn't currently
-     *  exist), excluding the extension.
-     *
-     * @returns The library path excluding the extension.
-     */
-    std::string get_library_generic_path() const;
-
-    /** Get the name of the model.
-     *
-     * @returns The name of the model.
-     */
-    std::string get_model_name() const;
+    ADModel() {}
 
     /** Compile the library into a dynamic library.
      *
+     * @param[in] model_name     Name of the compiled model.
+     * @param[in] directory_name Path of directory where model library should
+     *                           go.
      * @param[in] verbose        Print additional information.
      * @param[in] compile_flags  Flags to pass to the compiler to compile the
      *                           library.
+     *
+     * @returns The compiled model.
      */
-    void compile(bool verbose = false,
-                 std::vector<std::string> compile_flags = {
-                     "-O3", "-march=native", "-mtune=native",
-                     "-ffast-math"}) const;
+    CompiledModel compile(const std::string& model_name,
+                          const std::string& directory_name,
+                          bool verbose = false,
+                          std::vector<std::string> compile_flags = {
+                              "-O3", "-march=native", "-mtune=native",
+                              "-ffast-math"}) const;
 
    protected:
     /** Defines this model's (parameterless) function.
@@ -95,7 +84,7 @@ class ADModel {
      *
      * @returns The function output.
      */
-    virtual ADVector function(const ADVector& x) const;
+    virtual ADOutput function(const ADInput& x) const;
 
     /** Defines this model's (parameterized) function.
      *
@@ -109,7 +98,7 @@ class ADModel {
      *
      * @returns The function output.
      */
-    virtual ADVector function(const ADVector& x, const ADVector& p) const;
+    virtual ADOutput function(const ADInput& x, const ADParameters& p) const;
 
     /** Generates the input that should be used when recording the operation
      *  sequence for auto-differentiation. Also defines the shape of the input.
@@ -121,7 +110,7 @@ class ADModel {
      *
      * @returns The input vector to use for auto-differentiation.
      */
-    virtual ADVector input() const = 0;
+    virtual ADInput input() const = 0;
 
     /** Generates the parameter vector that should be used when recording the
      *  operation sequence for auto-differentiation. Also defines the shape of
@@ -130,13 +119,7 @@ class ADModel {
      *
      * @returns The parameter vector to use for auto-differentiation
      */
-    virtual ADVector parameters() const;
-
-   private:
-    std::string model_name_;
-    std::string directory_name_;
-    std::string library_generic_path_;
-    ADOrder order_;
+    virtual ADParameters parameters() const;
 };  // class ADModel
 
 #include "impl/ADModel.tpp"
