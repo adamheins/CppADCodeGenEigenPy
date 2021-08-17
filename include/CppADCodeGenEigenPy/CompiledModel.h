@@ -6,14 +6,15 @@
 
 namespace CppADCodeGenEigenPy {
 
-/** A Model wraps a dynamic library that has been compiled from derived class
+/** A CompiledModel wraps a dynamic library that has been compiled from derived
+ * class
  *  of ADModel. It provides methods for evaluating the function and available
  *  derivatives (Jacobian, Hessian).
  *
  * @tparam Scalar  The scalar type to use. Typically float or double.
  */
 template <typename Scalar>
-class Model {
+class CompiledModel {
    public:
     /** Dynamic vector type. */
     using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
@@ -29,8 +30,8 @@ class Model {
      * @param[in] library_generic_path  The full path to the dynamic library,
      *                                  without the file extension.
      */
-    Model(const std::string& model_name,
-          const std::string& library_generic_path);
+    CompiledModel(const std::string& model_name,
+                  const std::string& library_generic_path);
 
     /** Evaluate the function. This overload should be called if the modelled
      *  function has no parameters.
@@ -154,8 +155,8 @@ class Model {
     // user shouldn't have passed parameters
     void check_input_size_with_params(size_t input_size,
                                       size_t param_size) const;
-};  // class Model
+};  // class CompiledModel
 
-#include "impl/Model.tpp"
+#include "impl/CompiledModel.tpp"
 
 }  // namespace CppADCodeGenEigenPy

@@ -33,3 +33,8 @@ struct BasicTestModel : public ad::ADModel<Scalar> {
         return evaluate<ADScalar>(input);
     }
 };
+
+
+int main() {
+    ADModel<Scalar, INPUT_DIM, PARAM_DIM, OUTPUT_DIM>()
+}

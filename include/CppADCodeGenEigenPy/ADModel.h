@@ -1,26 +1,31 @@
 #pragma once
 
 #include <Eigen/Eigen>
-#include <boost/filesystem.hpp>
 #include <cppad/cg.hpp>
-
 #include <iostream>
+
+#include <CppADCodeGenEigenPy/CompiledModel.h>
+#include <CppADCodeGenEigenPy/Util.h>
 
 namespace CppADCodeGenEigenPy {
 
 /** Derivative order */
 enum class DerivativeOrder { Zero, First, Second };
 
-/** Abstract base class for a function to be auto-differentiated and compiled.
+/** Abstract base class for a function to be auto-differentiated and then
+ *  compiled.
  *
  * This class should be subclassed to define the function and its inputs and
  * (optional) parameters. It can then be compiled to a dynamic library and
  * loaded for use with the `Model` class.
  *
- * @tparam Scalar  The scalar type to use. Typically float or double.
+ * @tparam Scalar     The scalar type to use. Typically float or double.
+ * @tparam InputDim   Length of the function's input vector.
+ * @tparam OutputDim  Length of the function's output vector.
+ * @tparam ParamDim   Length of the function's parameter vector (optional).
  */
-template <typename Scalar, int InputDim = Eigen::Dynamic,
-          int OutputDim = Eigen::Dynamic, int ParamDim = Eigen::Dynamic>
+template <typename Scalar, size_t InputDim, size_t OutputDim,
+          size_t ParamDim = 0>
 class ADModel {
    public:
     using ADScalarBase = CppAD::cg::CG<Scalar>;
@@ -45,33 +50,26 @@ class ADModel {
     using ADMatrix = Eigen::Matrix<ADScalar, Eigen::Dynamic, Eigen::Dynamic,
                                    Eigen::RowMajor>;
 
-    /** Constructor.
-     *
-     * @param[in] model_name      The name of this model.
-     * @param[in] directory_name  The directory path where the dynamic library
-     *                            should go once compiled.
-     * @param[in] order           Order of derivatives to be taken. Zero
-     *                            indicates no derivatives are computed.
-     */
+    /** Constructor. */
     ADModel() {}
 
     /** Compile the library into a dynamic library.
      *
      * @param[in] model_name     Name of the compiled model.
-     * @param[in] directory_name Path of directory where model library should
-     *                           go.
+     * @param[in] directory_path Path of directory where model library should
+     *                           go. The direcotory must exist; it will not be
+     *                           created automatically.
      * @param[in] verbose        Print additional information.
      * @param[in] compile_flags  Flags to pass to the compiler to compile the
      *                           library.
      *
      * @returns The compiled model.
      */
-    CompiledModel compile(const std::string& model_name,
-                          const std::string& directory_name,
-                          bool verbose = false,
-                          std::vector<std::string> compile_flags = {
-                              "-O3", "-march=native", "-mtune=native",
-                              "-ffast-math"}) const;
+    CompiledModel<Scalar> compile(
+        const std::string& model_name, const std::string& directory_path,
+        DerivativeOrder order = DerivativeOrder::Second, bool verbose = false,
+        std::vector<std::string> compile_flags = {
+            "-O3", "-march=native", "-mtune=native", "-ffast-math"}) const;
 
    protected:
     /** Defines this model's (parameterless) function.

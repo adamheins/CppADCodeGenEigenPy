@@ -1,8 +1,8 @@
 #pragma once
 
 template <typename Scalar>
-Model<Scalar>::Model(const std::string& model_name,
-                               const std::string& library_generic_path) {
+CompiledModel<Scalar>::CompiledModel(const std::string& model_name,
+                                     const std::string& library_generic_path) {
     lib_.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
         library_generic_path +
         CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
@@ -12,7 +12,7 @@ Model<Scalar>::Model(const std::string& model_name,
 }
 
 template <typename Scalar>
-typename Model<Scalar>::Vector Model<Scalar>::evaluate(
+typename CompiledModel<Scalar>::Vector CompiledModel<Scalar>::evaluate(
     const Eigen::Ref<const Vector>& input) const {
     check_input_size(input.size());
 
@@ -23,7 +23,7 @@ typename Model<Scalar>::Vector Model<Scalar>::evaluate(
 }
 
 template <typename Scalar>
-typename Model<Scalar>::Vector Model<Scalar>::evaluate(
+typename CompiledModel<Scalar>::Vector CompiledModel<Scalar>::evaluate(
     const Eigen::Ref<const Vector>& input,
     const Eigen::Ref<const Vector>& parameters) const {
     check_input_size_with_params(input.size(), parameters.size());
@@ -34,7 +34,7 @@ typename Model<Scalar>::Vector Model<Scalar>::evaluate(
 }
 
 template <typename Scalar>
-typename Model<Scalar>::Matrix Model<Scalar>::jacobian(
+typename CompiledModel<Scalar>::Matrix CompiledModel<Scalar>::jacobian(
     const Eigen::Ref<const Vector>& input) const {
     if (!model_->isJacobianAvailable()) {
         throw std::runtime_error(
@@ -51,7 +51,7 @@ typename Model<Scalar>::Matrix Model<Scalar>::jacobian(
 }
 
 template <typename Scalar>
-typename Model<Scalar>::Matrix Model<Scalar>::jacobian(
+typename CompiledModel<Scalar>::Matrix CompiledModel<Scalar>::jacobian(
     const Eigen::Ref<const Vector>& input,
     const Eigen::Ref<const Vector>& parameters) const {
     check_input_size_with_params(input.size(), parameters.size());
@@ -62,7 +62,7 @@ typename Model<Scalar>::Matrix Model<Scalar>::jacobian(
 }
 
 template <typename Scalar>
-typename Model<Scalar>::Matrix Model<Scalar>::hessian(
+typename CompiledModel<Scalar>::Matrix CompiledModel<Scalar>::hessian(
     const Eigen::Ref<const Vector>& input, size_t output_dim) const {
     if (!model_->isHessianAvailable()) {
         throw std::runtime_error(
@@ -89,7 +89,7 @@ typename Model<Scalar>::Matrix Model<Scalar>::hessian(
 }
 
 template <typename Scalar>
-typename Model<Scalar>::Matrix Model<Scalar>::hessian(
+typename CompiledModel<Scalar>::Matrix CompiledModel<Scalar>::hessian(
     const Eigen::Ref<const Vector>& input,
     const Eigen::Ref<const Vector>& parameters, size_t output_dim) const {
     check_input_size_with_params(input.size(), parameters.size());
@@ -100,17 +100,17 @@ typename Model<Scalar>::Matrix Model<Scalar>::hessian(
 }
 
 template <typename Scalar>
-size_t Model<Scalar>::get_input_size() const {
+size_t CompiledModel<Scalar>::get_input_size() const {
     return input_size_;
 }
 
 template <typename Scalar>
-size_t Model<Scalar>::get_output_size() const {
+size_t CompiledModel<Scalar>::get_output_size() const {
     return output_size_;
 }
 
 template <typename Scalar>
-void Model<Scalar>::check_input_size(size_t size) const {
+void CompiledModel<Scalar>::check_input_size(size_t size) const {
     if (size < input_size_) {
         throw std::runtime_error(
             "Model domain is " + std::to_string(input_size_) +
@@ -124,8 +124,8 @@ void Model<Scalar>::check_input_size(size_t size) const {
 }
 
 template <typename Scalar>
-void Model<Scalar>::check_input_size_with_params(size_t input_size,
-                                                      size_t param_size) const {
+void CompiledModel<Scalar>::check_input_size_with_params(
+    size_t input_size, size_t param_size) const {
     size_t total_size = input_size + param_size;
     if (total_size > input_size_) {
         throw std::runtime_error(
