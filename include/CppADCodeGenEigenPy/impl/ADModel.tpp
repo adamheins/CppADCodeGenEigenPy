@@ -1,37 +1,22 @@
 #pragma once
 
-template <typename Scalar, size_t InputDim, size_t OutputDim, size_t ParamDim>
-CompiledModel<Scalar> ADModel<Scalar, InputDim, OutputDim, ParamDim>::compile(
+template <typename Scalar>
+CompiledModel<Scalar> ADModel<Scalar>::compile(
     const std::string& model_name, const std::string& directory_path,
     DerivativeOrder order, bool verbose,
     std::vector<std::string> compile_flags) const {
+    ADVector x = input();
+    ADVector p = parameters();
+    ADVector xp(x.rows() + p.rows());
+    xp << x, p;
 
-    Eigen::Matrix<ADScalar, InputDim + ParamDim, 1> xp;
-    ADInput x_test = input();
-    ADParameters p_test = parameters();
-    xp << x_test, p_test;
-
-    std::cout << "one" << std::endl;
-    std::cout << x_test.rows() << std::endl;
-    std::cout << p_test.rows() << std::endl;
-    std::cout << xp.rows() << std::endl;
-
-    ADVector xp_dynamic = Eigen::Map<ADVector>(xp.data(), xp.rows(), xp.cols());
-    CppAD::Independent(xp_dynamic);
-
-    std::cout << "two" << std::endl;
+    CppAD::Independent(xp);
 
     // Apply the model function to get output
-    ADInput x = xp.template head<InputDim>();
-    ADParameters p = xp.template tail<ParamDim>();
-    ADOutput y = function(x, p);
-
-    std::cout << "three" << std::endl;
+    ADVector y = function(xp.head(x.rows()), xp.tail(p.rows()));
 
     // Record the relationship for AD
     CppAD::ADFun<ADScalarBase> ad_func(xp, y);
-
-    std::cout << "four" << std::endl;
 
     // Optimize the operation sequence
     ad_func.optimize();
@@ -68,16 +53,16 @@ CompiledModel<Scalar> ADModel<Scalar, InputDim, OutputDim, ParamDim>::compile(
     return CompiledModel<Scalar>(model_name, lib_generic_path);
 }
 
-template <typename Scalar, size_t InputDim, size_t OutputDim, size_t ParamDim>
-typename ADModel<Scalar, InputDim, OutputDim, ParamDim>::ADOutput ADModel<
-    Scalar, InputDim, OutputDim, ParamDim>::function(const ADInput& x) const {
-    return ADOutput::Zero();
+template <typename Scalar>
+typename ADModel<Scalar>::ADVector ADModel<Scalar>::function(
+    const ADVector& x) const {
+    // Default is a single 0.
+    return ADVector::Zero(1);
 }
 
-template <typename Scalar, size_t InputDim, size_t OutputDim, size_t ParamDim>
-typename ADModel<Scalar, InputDim, OutputDim, ParamDim>::ADOutput
-ADModel<Scalar, InputDim, OutputDim, ParamDim>::function(
-    const ADInput& x, const ADParameters& p) const {
+template <typename Scalar>
+typename ADModel<Scalar>::ADVector ADModel<Scalar>::function(
+    const ADVector& x, const ADVector& p) const {
     // We only want user to have to override one of the "function" methods,
     // which means neither can be pure virtual. This is one downside: the
     // compiler will let you compile a model with a default function value.
@@ -89,14 +74,8 @@ ADModel<Scalar, InputDim, OutputDim, ParamDim>::function(
     return function(x);
 }
 
-template <typename Scalar, size_t InputDim, size_t OutputDim, size_t ParamDim>
-typename ADModel<Scalar, InputDim, OutputDim, ParamDim>::ADParameters
-ADModel<Scalar, InputDim, OutputDim, ParamDim>::parameters() const {
-    // TODO this is now problematic because it won't compile if parameters is
-    // dynamic size---how does eigen handle this?
-    // TODO we may just have to go fully fixed size... I guess this would be
-    // fine; it makes things more concrete. The other option would be to always
-    // just return some known size thing (like zero-length), but that violates
-    // the idea of having fixed-size matrices
-    return ADParameters::Ones();
+template <typename Scalar>
+typename ADModel<Scalar>::ADVector ADModel<Scalar>::parameters() const {
+    // Default is an empty parameter vector.
+    return ADVector(0);
 }

@@ -20,27 +20,14 @@ enum class DerivativeOrder { Zero, First, Second };
  * loaded for use with the `Model` class.
  *
  * @tparam Scalar     The scalar type to use. Typically float or double.
- * @tparam InputDim   Length of the function's input vector.
- * @tparam OutputDim  Length of the function's output vector.
- * @tparam ParamDim   Length of the function's parameter vector (optional).
  */
-template <typename Scalar, size_t InputDim, size_t OutputDim,
-          size_t ParamDim = 0>
+template <typename Scalar>
 class ADModel {
    public:
     using ADScalarBase = CppAD::cg::CG<Scalar>;
 
     /** Auto-diff scalar type. */
     using ADScalar = CppAD::AD<ADScalarBase>;
-
-    /** Auto-diff input vector type. */
-    using ADInput = Eigen::Matrix<ADScalar, InputDim, 1>;
-
-    /** Auto-diff output vector type. */
-    using ADOutput = Eigen::Matrix<ADScalar, OutputDim, 1>;
-
-    /** Auto-diff parameter vector type. */
-    using ADParameters = Eigen::Matrix<ADScalar, ParamDim, 1>;
 
     /** Auto-diff dynamic vector type. */
     using ADVector = Eigen::Matrix<ADScalar, Eigen::Dynamic, 1>;
@@ -82,7 +69,7 @@ class ADModel {
      *
      * @returns The function output.
      */
-    virtual ADOutput function(const ADInput& x) const;
+    virtual ADVector function(const ADVector& x) const;
 
     /** Defines this model's (parameterized) function.
      *
@@ -96,7 +83,7 @@ class ADModel {
      *
      * @returns The function output.
      */
-    virtual ADOutput function(const ADInput& x, const ADParameters& p) const;
+    virtual ADVector function(const ADVector& x, const ADVector& p) const;
 
     /** Generates the input that should be used when recording the operation
      *  sequence for auto-differentiation. Also defines the shape of the input.
@@ -108,7 +95,7 @@ class ADModel {
      *
      * @returns The input vector to use for auto-differentiation.
      */
-    virtual ADInput input() const = 0;
+    virtual ADVector input() const = 0;
 
     /** Generates the parameter vector that should be used when recording the
      *  operation sequence for auto-differentiation. Also defines the shape of
@@ -117,7 +104,7 @@ class ADModel {
      *
      * @returns The parameter vector to use for auto-differentiation
      */
-    virtual ADParameters parameters() const;
+    virtual ADVector parameters() const;
 };  // class ADModel
 
 #include "impl/ADModel.tpp"
