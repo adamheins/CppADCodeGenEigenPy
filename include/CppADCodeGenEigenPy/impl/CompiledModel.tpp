@@ -2,10 +2,14 @@
 
 template <typename Scalar>
 CompiledModel<Scalar>::CompiledModel(const std::string& model_name,
-                                     const std::string& library_generic_path) {
-    lib_.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
-        library_generic_path +
-        CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
+                                     const std::string& library_generic_path)
+    : lib_(new CppAD::cg::LinuxDynamicLib<Scalar>(
+          library_generic_path +
+          CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION)) {
+    // TODO we could do without the lib_ entirely, I think...
+    // lib_.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
+    //     library_generic_path +
+    //     CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
     model_ = lib_->model(model_name);
     input_size_ = model_->Domain();
     output_size_ = model_->Range();
@@ -15,10 +19,6 @@ template <typename Scalar>
 typename CompiledModel<Scalar>::Vector CompiledModel<Scalar>::evaluate(
     const Eigen::Ref<const Vector>& input) const {
     check_input_size(input.size());
-
-    // We need to explicitly tell the compiler what the template parameter
-    // is (Vector), since otherwise it will deduce it as Eigen::Ref, which
-    // won't work. See <https://stackoverflow.com/a/3505738/5145874>.
     return model_->template ForwardZero<Vector>(input);
 }
 

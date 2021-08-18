@@ -4,6 +4,8 @@
 #include <cppad/cg.hpp>
 #include <string>
 
+#include <CppADCodeGenEigenPy/Util.h>
+
 namespace CppADCodeGenEigenPy {
 
 /** A CompiledModel wraps a dynamic library that has been compiled from derived
@@ -32,6 +34,8 @@ class CompiledModel {
      */
     CompiledModel(const std::string& model_name,
                   const std::string& library_generic_path);
+
+    // ~CompiledModel() = default;
 
     /** Evaluate the function. This overload should be called if the modelled
      *  function has no parameters.

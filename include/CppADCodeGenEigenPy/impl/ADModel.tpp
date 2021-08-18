@@ -5,21 +5,33 @@ CompiledModel<Scalar> ADModel<Scalar, InputDim, OutputDim, ParamDim>::compile(
     const std::string& model_name, const std::string& directory_path,
     DerivativeOrder order, bool verbose,
     std::vector<std::string> compile_flags) const {
-    Eigen::Matrix<ADScalar,
-                  ADInput::RowsAtCompileTime + ADParameters::RowsAtCompileTime,
-                  1>
-        xp;
-    xp << input(), parameters();
 
-    CppAD::Independent(xp);
+    Eigen::Matrix<ADScalar, InputDim + ParamDim, 1> xp;
+    ADInput x_test = input();
+    ADParameters p_test = parameters();
+    xp << x_test, p_test;
+
+    std::cout << "one" << std::endl;
+    std::cout << x_test.rows() << std::endl;
+    std::cout << p_test.rows() << std::endl;
+    std::cout << xp.rows() << std::endl;
+
+    ADVector xp_dynamic = Eigen::Map<ADVector>(xp.data(), xp.rows(), xp.cols());
+    CppAD::Independent(xp_dynamic);
+
+    std::cout << "two" << std::endl;
 
     // Apply the model function to get output
-    ADInput x = xp.template head<ADInput::RowsAtCompileTime>();
-    ADParameters p = xp.template tail<ADParameters::RowsAtCompileTime>();
+    ADInput x = xp.template head<InputDim>();
+    ADParameters p = xp.template tail<ParamDim>();
     ADOutput y = function(x, p);
+
+    std::cout << "three" << std::endl;
 
     // Record the relationship for AD
     CppAD::ADFun<ADScalarBase> ad_func(xp, y);
+
+    std::cout << "four" << std::endl;
 
     // Optimize the operation sequence
     ad_func.optimize();

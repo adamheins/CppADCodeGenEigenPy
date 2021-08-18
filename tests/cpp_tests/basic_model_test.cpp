@@ -12,6 +12,8 @@ using Scalar = double;
 
 static const std::string MODEL_NAME = "BasicTestModel";
 static const std::string FOLDER_NAME = "/tmp/CppADCodeGenEigenPy";
+static const std::string LIB_GENERIC_NAME =
+    get_library_generic_path(MODEL_NAME, FOLDER_NAME);
 
 static const int NUM_INPUT = 3;
 static const int NUM_OUTPUT = NUM_INPUT;
@@ -21,7 +23,8 @@ using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 // Just multiply input vector by 2.
 template <typename Scalar>
-static Vector<Scalar> evaluate(const Vector<Scalar>& input) {
+static Eigen::Matrix<Scalar, NUM_OUTPUT, 1> evaluate(
+    const Eigen::Matrix<Scalar, NUM_INPUT, 1>& input) {
     return input * Scalar(2.);
 }
 
@@ -50,18 +53,17 @@ class BasicTestModelFixture : public ::testing::Test {
 
     void SetUp() override {
         ad_model_ptr_.reset(new BasicTestModel<Scalar>());
-        CompiledModel<Scalar> model = ad_model_ptr_->compile(MODEL_NAME, FOLDER_NAME,
-                                                     DerivativeOrder::Second);
-        // TODO need a clone() method for this, or else rethink returning the
-        // compiled model at all
-        model_ptr_.reset(new CompiledModel<Scalar>(model));
+        ad_model_ptr_->compile(MODEL_NAME, FOLDER_NAME,
+                               DerivativeOrder::Second);
+        // model_ptr_.reset(
+        //     new CompiledModel<Scalar>(MODEL_NAME, LIB_GENERIC_NAME));
     }
 
     // TODO we could delete the .so afterward
     // void TearDown() override {}
 
     std::unique_ptr<BasicTestModel<Scalar>> ad_model_ptr_;
-    std::unique_ptr<CompiledModel<Scalar>> model_ptr_;
+    // std::unique_ptr<CompiledModel<Scalar>> model_ptr_;
 };
 
 TEST_F(BasicTestModelFixture, CreatesSharedLib) {
