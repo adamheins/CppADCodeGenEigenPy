@@ -7,12 +7,12 @@
 #include <CppADCodeGenEigenPy/CompiledModel.h>
 #include <CppADCodeGenEigenPy/Util.h>
 
-#include "testing/models/BasicTestModel.h"
+#include "testing/models/MathFunctionsTestModel.h"
 
 namespace CppADCodeGenEigenPy {
-namespace BasicModelTest {
+namespace MathFunctionsModelTest {
 
-class BasicTestModelFixture : public ::testing::Test {
+class MathFunctionsTestModelFixture : public ::testing::Test {
    protected:
     using Vector = CompiledModel<Scalar>::Vector;
     using Matrix = CompiledModel<Scalar>::Matrix;
@@ -20,7 +20,7 @@ class BasicTestModelFixture : public ::testing::Test {
     static void SetUpTestSuite() {
         // Compile and load our model
         boost::filesystem::create_directories(DIRECTORY_PATH);
-        ad_model_ptr_.reset(new BasicTestModel<Scalar>());
+        ad_model_ptr_.reset(new MathFunctionsTestModel<Scalar>());
         ad_model_ptr_->compile(MODEL_NAME, DIRECTORY_PATH,
                                DerivativeOrder::Second);
         compiled_model_ptr_.reset(
@@ -36,74 +36,62 @@ class BasicTestModelFixture : public ::testing::Test {
     static std::unique_ptr<CompiledModel<Scalar>> compiled_model_ptr_;
 };
 
-std::unique_ptr<ADModel<Scalar>> BasicTestModelFixture::ad_model_ptr_ =
+std::unique_ptr<ADModel<Scalar>> MathFunctionsTestModelFixture::ad_model_ptr_ =
     nullptr;
 std::unique_ptr<CompiledModel<Scalar>>
-    BasicTestModelFixture::compiled_model_ptr_ = nullptr;
+    MathFunctionsTestModelFixture::compiled_model_ptr_ = nullptr;
 
-TEST_F(BasicTestModelFixture, CreatesSharedLib) {
-    EXPECT_TRUE(boost::filesystem::exists(LIB_REAL_PATH))
-        << "Shared library file " << LIB_REAL_PATH << " not found.";
-}
-
-TEST_F(BasicTestModelFixture, Dimensions) {
-    // test that the model shape is correct
-    EXPECT_EQ(compiled_model_ptr_->get_input_size(), NUM_INPUT)
-        << "Input size is incorrect.";
-    EXPECT_EQ(compiled_model_ptr_->get_output_size(), NUM_OUTPUT)
-        << "Output size is incorrect.";
-
-    // generate an input with a size too large
-    Vector input = Vector::Ones(NUM_INPUT + 1);
-
-    EXPECT_THROW(compiled_model_ptr_->evaluate(input), std::runtime_error)
-        << "Evaluate with input of wrong size did not throw.";
-    EXPECT_THROW(compiled_model_ptr_->jacobian(input), std::runtime_error)
-        << "Jacobian with input of wrong size did not throw.";
-    EXPECT_THROW(compiled_model_ptr_->hessian(input, 0), std::runtime_error)
-        << "Hessian with input of wrong size did not throw.";
-}
-
-TEST_F(BasicTestModelFixture, Evaluation) {
+TEST_F(MathFunctionsTestModelFixture, Evaluation) {
     Vector input = Vector::Ones(NUM_INPUT);
 
     Vector output_expected = evaluate<Scalar>(input);
     Vector output_actual = compiled_model_ptr_->evaluate(input);
+
     EXPECT_TRUE(output_actual.isApprox(output_expected))
         << "Function evaluation is incorrect.";
 }
 
-TEST_F(BasicTestModelFixture, Jacobian) {
+TEST_F(MathFunctionsTestModelFixture, Jacobian) {
     Vector input = Vector::Ones(NUM_INPUT);
 
+    // clang-format off
     Matrix J_expected(NUM_OUTPUT, NUM_INPUT);
-    J_expected.setZero();
-    J_expected.diagonal() << 2, 2, 2;
+    J_expected << cos(input(0)) * cos(input(1)), -sin(input(0)) * sin(input(1)), 0,
+                  0, 0, 0.5 / sqrt(input(2)),
+                  2 * input.transpose();
+    // clang-format on
     Matrix J_actual = compiled_model_ptr_->jacobian(input);
 
     EXPECT_TRUE(J_actual.isApprox(J_expected)) << "Jacobian is incorrect.";
 }
 
-TEST_F(BasicTestModelFixture, Hessian) {
+TEST_F(MathFunctionsTestModelFixture, Hessian) {
     Vector input = Vector::Ones(NUM_INPUT);
 
-    // Hessian of all output dimensions should be zero
-    Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
+    // clang-format off
+    Matrix H0_expected(NUM_INPUT, NUM_INPUT);
+    H0_expected <<
+        -sin(input(0)) * cos(input(1)), -cos(input(0)) * sin(input(1)), 0,
+        -cos(input(0)) * sin(input(1)), -sin(input(0)) * cos(input(1)), 0,
+        0, 0, 0;
+    // clang-format on
+
+    Matrix H1_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
+    H1_expected(2, 2) = -0.25 * pow(input(2), -1.5);
+
+    Matrix H2_expected = 2 * Matrix::Identity(NUM_INPUT, NUM_INPUT);
+
     Matrix H0_actual = compiled_model_ptr_->hessian(input, 0);
     Matrix H1_actual = compiled_model_ptr_->hessian(input, 1);
     Matrix H2_actual = compiled_model_ptr_->hessian(input, 2);
 
-    EXPECT_TRUE(H0_actual.isApprox(H_expected))
+    EXPECT_TRUE(H0_actual.isApprox(H0_expected))
         << "Hessian for dim 0 is incorrect.";
-    EXPECT_TRUE(H1_actual.isApprox(H_expected))
+    EXPECT_TRUE(H1_actual.isApprox(H1_expected))
         << "Hessian for dim 1 is incorrect.";
-    EXPECT_TRUE(H2_actual.isApprox(H_expected))
+    EXPECT_TRUE(H2_actual.isApprox(H2_expected))
         << "Hessian for dim 2 is incorrect.";
-
-    EXPECT_THROW(compiled_model_ptr_->hessian(input, NUM_OUTPUT),
-                 std::runtime_error)
-        << "Hessian with too-large output_dim did not throw.";
 }
 
-}  // namespace BasicModelTest
+}  // namespace MathFunctionsModelTest
 }  // namespace CppADCodeGenEigenPy

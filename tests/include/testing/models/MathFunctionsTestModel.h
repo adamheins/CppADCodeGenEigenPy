@@ -8,28 +8,31 @@
 #include "testing/Defs.h"
 
 namespace CppADCodeGenEigenPy {
-namespace BasicModelTest {
+namespace MathFunctionsModelTest {
 
 using Scalar = double;
 
-const std::string MODEL_NAME = "BasicTestModel";
+static const std::string MODEL_NAME = "MathFunctionsTestModel";
 const std::string DIRECTORY_PATH = "/tmp/CppADCodeGenEigenPy";
 const std::string LIB_GENERIC_PATH =
     get_library_generic_path(MODEL_NAME, DIRECTORY_PATH);
 const std::string LIB_REAL_PATH =
     get_library_real_path(MODEL_NAME, DIRECTORY_PATH);
 
-const int NUM_INPUT = 3;
-const int NUM_OUTPUT = NUM_INPUT;
+static const int NUM_INPUT = 3;
+static const int NUM_OUTPUT = NUM_INPUT;
 
-// Just multiply input vector by 2.
+// Use various math routines: trigonometry, square root, vector operations
 template <typename Scalar>
 static Vector<Scalar> evaluate(const Vector<Scalar>& input) {
-    return input * Scalar(2.);
+    Vector<Scalar> output(NUM_OUTPUT);
+    output << sin(input(0)) * cos(input(1)), sqrt(input(2)),
+        input.transpose() * input;
+    return output;
 }
 
 template <typename Scalar>
-struct BasicTestModel : public ADModel<Scalar> {
+struct MathFunctionsTestModel : public ADModel<Scalar> {
     using typename ADModel<Scalar>::ADScalar;
     using typename ADModel<Scalar>::ADVector;
 
@@ -42,5 +45,5 @@ struct BasicTestModel : public ADModel<Scalar> {
     }
 };
 
-}  // namespace BasicModelTest
+}  // namespace MathFunctionsModelTest
 }  // namespace CppADCodeGenEigenPy
