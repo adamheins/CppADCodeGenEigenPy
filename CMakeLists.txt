@@ -24,6 +24,23 @@ FetchContent_Declare(
 option(INSTALL_GTEST "Enable installation of googletest." OFF)
 FetchContent_MakeAvailable(googletest)
 
+# build compiler for models used for the Python tests, then run it
+add_executable(
+  python_test_model_compiler
+  tests/python_tests/compile_models.cpp
+)
+target_include_directories(python_test_model_compiler PUBLIC include tests/include)
+target_link_libraries(
+  python_test_model_compiler
+  dl
+)
+add_custom_target(
+  compile_python_test_models ALL
+  COMMAND python_test_model_compiler ${CMAKE_CURRENT_SOURCE_DIR}/tests/python_tests
+  COMMENT "Compiling models for Python tests"
+  VERBATIM
+)
+
 # testing
 enable_testing()
 
