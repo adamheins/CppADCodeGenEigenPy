@@ -36,16 +36,9 @@ class BasicTestModelFixture : public ::testing::Test {
     static std::unique_ptr<CompiledModel<Scalar>> compiled_model_ptr_;
 };
 
-std::unique_ptr<ADModel<Scalar>> BasicTestModelFixture::ad_model_ptr_ =
-    nullptr;
+std::unique_ptr<ADModel<Scalar>> BasicTestModelFixture::ad_model_ptr_ = nullptr;
 std::unique_ptr<CompiledModel<Scalar>>
     BasicTestModelFixture::compiled_model_ptr_ = nullptr;
-
-TEST(MiscModelTests, NonexistentLib) {
-    // TODO this should raise an error that can be dealt with somehow (at least
-    // propagated to the Python side)
-    CompiledModel<Scalar> model("FakeModel", "nonexistent_path");
-}
 
 TEST_F(BasicTestModelFixture, CreatesSharedLib) {
     EXPECT_TRUE(boost::filesystem::exists(LIB_REAL_PATH))

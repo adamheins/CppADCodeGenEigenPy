@@ -46,6 +46,7 @@ enable_testing()
 
 add_executable(
   model_tests
+  tests/cpp_tests/MiscTest.cpp
   tests/cpp_tests/BasicModelTest.cpp
   tests/cpp_tests/ParameterizedModelTest.cpp
   tests/cpp_tests/MathFunctionsModelTest.cpp

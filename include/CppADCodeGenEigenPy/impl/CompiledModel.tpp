@@ -1,15 +1,17 @@
 #pragma once
 
+
 template <typename Scalar>
 CompiledModel<Scalar>::CompiledModel(const std::string& model_name,
-                                     const std::string& library_generic_path)
-    : lib_(new CppAD::cg::LinuxDynamicLib<Scalar>(
-          library_generic_path +
-          CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION)) {
+                                     const std::string& library_generic_path) {
+    // : lib_.(new CppAD::cg::LinuxDynamicLib<Scalar>(
+    //       library_generic_path +
+    //       CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION)) {
     // TODO we could do without the lib_ entirely, I think...
-    // lib_.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
-    //     library_generic_path +
-    //     CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
+    CppAD::ErrorHandler handler(error_handler);
+    lib_.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
+        library_generic_path +
+        CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
     model_ = lib_->model(model_name);
     input_size_ = model_->Domain();
     output_size_ = model_->Range();
