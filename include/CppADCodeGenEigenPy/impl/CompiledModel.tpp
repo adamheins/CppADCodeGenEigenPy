@@ -1,14 +1,13 @@
 #pragma once
 
-
 template <typename Scalar>
 CompiledModel<Scalar>::CompiledModel(const std::string& model_name,
                                      const std::string& library_generic_path) {
-    // : lib_.(new CppAD::cg::LinuxDynamicLib<Scalar>(
-    //       library_generic_path +
-    //       CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION)) {
-    // TODO we could do without the lib_ entirely, I think...
+    // Replace CppAD error handler so that error is thrown if dynamic library
+    // cannot be loaded for some reason. See
+    // https://coin-or.github.io/CppAD/doc/error_handler.cpp.htm
     CppAD::ErrorHandler handler(error_handler);
+
     lib_.reset(new CppAD::cg::LinuxDynamicLib<Scalar>(
         library_generic_path +
         CppAD::cg::system::SystemInfo<>::DYNAMIC_LIB_EXTENSION));
