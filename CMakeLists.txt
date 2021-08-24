@@ -27,7 +27,7 @@ FetchContent_MakeAvailable(googletest)
 # build compiler for models used for the Python tests, then run it
 add_executable(
   python_test_model_compiler
-  tests/python_tests/compile_models.cpp
+  tests/helpers/compile_models.cpp
 )
 target_include_directories(python_test_model_compiler PUBLIC include tests/include)
 target_link_libraries(
@@ -36,7 +36,7 @@ target_link_libraries(
 )
 add_custom_target(
   compile_python_test_models ALL
-  COMMAND python_test_model_compiler ${CMAKE_CURRENT_SOURCE_DIR}/tests/python_tests
+  COMMAND python_test_model_compiler ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Compiling models for Python tests"
   VERBATIM
 )

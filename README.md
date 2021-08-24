@@ -53,21 +53,35 @@ cmake -S . -B build
 sudo cmake --install build
 ```
 
-If you also want to build CppADCodeGenEigenPy's tests, run
-```
-cmake --build build
-```
-and then run them:
-```
-cd build
-ctest
-```
-
 To build and install the Python bindings, `pip` is used. Note that `pip`
 version 10+ is required in order to parse `pyproject.toml`. Run
 ```
 python -m pip install .
 ```
+
+## Tests
+
+The C++ tests require [Boost](https://www.boost.org/) (tested with version 1.58).
+
+To build the tests, run
+```
+cmake --build build
+```
+
+To run the C++ tests:
+```
+cd build
+ctest
+```
+
+To run the Python tests:
+```
+python -m pytest
+```
+Note that the tests assume that the name of the build directory is `build` in
+order to find the required dynamic libraries. If this is not the case, you can
+pass `--builddir NAME` to pytest to change it.
+
 
 ## Example
 

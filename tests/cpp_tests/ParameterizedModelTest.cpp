@@ -42,7 +42,7 @@ std::unique_ptr<CompiledModel<Scalar>>
     ParameterizedTestModelFixture::compiled_model_ptr_ = nullptr;
 
 TEST_F(ParameterizedTestModelFixture, Evaluation) {
-    Vector input = Vector::Ones(NUM_INPUT);
+    Vector input = 2 * Vector::Ones(NUM_INPUT);
     Vector parameters = Vector::Ones(NUM_INPUT);
 
     Vector output_expected = evaluate<Scalar>(input, parameters);
@@ -56,7 +56,7 @@ TEST_F(ParameterizedTestModelFixture, Evaluation) {
 }
 
 TEST_F(ParameterizedTestModelFixture, Jacobian) {
-    Vector input = Vector::Ones(NUM_INPUT);
+    Vector input = 2 * Vector::Ones(NUM_INPUT);
     Vector parameters = Vector::Ones(NUM_INPUT);
 
     // note Jacobian of scalar function is a row vector, hence the transpose
@@ -71,7 +71,7 @@ TEST_F(ParameterizedTestModelFixture, Jacobian) {
 }
 
 TEST_F(ParameterizedTestModelFixture, Hessian) {
-    Vector input = Vector::Ones(NUM_INPUT);
+    Vector input = 2 * Vector::Ones(NUM_INPUT);
     Vector parameters = Vector::Ones(NUM_INPUT);
 
     Matrix H_expected = Matrix::Zero(NUM_INPUT, NUM_INPUT);
