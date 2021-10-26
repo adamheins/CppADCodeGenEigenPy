@@ -85,10 +85,8 @@ pass `--builddir NAME` to pytest to change it.
 
 ## Example
 
-This is basic example that you can also find implemented in the `examples`
-directory, along with some others.
-
-TODO
+A basic example differentiating functions related to rigid body dynamics can be
+found [here](https://github.com/adamheins/CppADCodeGenEigenPy-dynamics-example).
 
 ## License
 
