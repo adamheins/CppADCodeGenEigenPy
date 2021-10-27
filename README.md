@@ -86,7 +86,7 @@ pass `--builddir NAME` to pytest to change it.
 
 A minimal example of the C++ code to define and generate an auto-diff model
 would look something like:
-```
+```c++
 #include <CppADCodeGenEigenPy/ADModel.h>
 #include <Eigen/Eigen>
 
@@ -130,7 +130,7 @@ g++ -std=c++11 -I/usr/local/include/eigen3 model.cpp -ldl -o make_model
 ```
 
 This code can then be called from Python using:
-```
+```python
 import numpy as np
 from CppADCodeGenEigenPy import CompiledModel
 
