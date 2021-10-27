@@ -159,4 +159,4 @@ dynamics (which could be used for something like optimal control) can be found
 
 ## License
 
-MIT
+[MIT](https://github.com/adamheins/CppADCodeGenEigenPy/blob/main/LICENSE)
