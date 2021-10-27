@@ -8,9 +8,10 @@ Ubuntu versions, and likely works on other *nix systems as well.
 ## Motivation
 
 I want to be able to prototype code in Python while making use of fast,
-compiled auto-differentiated code. Autodiff tools in Python often just-in-time
-compile the code rather than ahead-of-time compile it. I don't want to wait for
-autodiff's JIT every time I run the script if nothing has changed.
+compiled auto-differentiated code. Autodiff tools in Python, such as
+[JAX](https://github.com/google/jax), often just-in-time compile the code rather
+than ahead-of-time compile it. I don't want to wait for JIT every time I run
+the script if nothing has changed.
 
 This project was heavily inspired by larger frameworks that incorporate
 auto-diff functionality via CppADCodeGen for convenience; in particular, the
@@ -21,14 +22,15 @@ module from [OCS2](https://github.com/leggedrobotics/ocs2) was a big influence.
 
 This project provides a simple interface to CppADCodeGen to define the required
 function in C++, which is then compiled (along with its automatically-computed
-derivates) into a dynamic library. This dynamic library can then be easily used
-from C++ or imported into Python via pybind11-based bindings.
+derivatives) into a dynamic library. This dynamic library can then be easily used
+from C++ or imported into Python via bindings based on
+[pybind11](https://github.com/pybind/pybind11).
 
 CppADCodeGenEigenPy is built around two classes. The first is the `ADModel`,
 which defines the function to be auto-differentiated. It is compiled into a
-dynamic library which can then be loaded by the second class, the regular
-`Model`. The `Model` can evaluate the function itself as well as its first and
-second-order derivatives.
+dynamic library which can then be loaded by the `CompiledModel` class. The
+`CompiledModel` can evaluate the function itself as well as its first and
+second derivatives.
 
 ## Install
 
