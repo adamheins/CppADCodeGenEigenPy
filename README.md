@@ -147,7 +147,9 @@ jacobian = model.jacobian(inputs, params)
 print(f"output = {output}")
 print(f"jacobian = {jacobian}")
 ```
-This C++ and Python code can be found in the [example](TODO) directory.
+This C++ and Python code can be found in the
+[example](https://github.com/adamheins/CppADCodeGenEigenPy/tree/main/example)
+directory.
 
 A fully worked example that differentiates functions related to rigid body
 dynamics (which could be used for something like optimal control) can be found
