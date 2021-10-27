@@ -35,7 +35,6 @@ second-order derivatives.
 First ensure you have the required dependencies:
 * a compiler with C++11 support
 * [cmake](https://cmake.org/) version 3.12+
-* [Boost](https://www.boost.org/) (tested with version 1.58)
 * [Eigen](https://eigen.tuxfamily.org/) version 3.3+
 * [CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)
 
@@ -61,7 +60,7 @@ python -m pip install .
 
 ## Tests
 
-The C++ tests require [Boost](https://www.boost.org/) (tested with version 1.58).
+The C++ tests require [Boost](https://www.boost.org/) (version 1.58+).
 
 To build the tests, run
 ```
@@ -85,8 +84,74 @@ pass `--builddir NAME` to pytest to change it.
 
 ## Example
 
-A basic example differentiating functions related to rigid body dynamics can be
-found [here](https://github.com/adamheins/CppADCodeGenEigenPy-dynamics-example).
+A minimal example of the C++ code to define and generate an auto-diff model
+would look something like:
+```
+#include <CppADCodeGenEigenPy/ADModel.h>
+#include <Eigen/Eigen>
+
+namespace ad = CppADCodeGenEigenPy;
+
+// Our custom model extends the ad::ADModel class
+template <typename Scalar>
+struct ExampleModel : public ad::ADModel<Scalar> {
+    using typename ad::ADModel<Scalar>::ADVector;
+
+    // Generate the input used when differentiating the function
+    ADVector input() const override { return ADVector::Ones(3); }
+
+    // Generate parameters used when differentiating the function
+    // This can be skipped if the function takes no parameters
+    ADVector parameters() const override { return ADVector::Ones(3); }
+
+    // Implement a weighted sum-of-squares function.
+    ADVector function(const ADVector& input,
+                      const ADVector& parameters) const override {
+        ADVector output(1);
+        for (int i = 0; i < 3; ++i) {
+            output(0) += 0.5 * parameters(i) * input(i) * input(i);
+        }
+        return output;
+    }
+};
+
+int main() {
+    // Compile model named ExampleModel and save in the current directory; the
+    // model is saved as a shared object file named libExampleModel.so
+    ExampleModel<double>().compile("ExampleModel", ".",
+                                   ad::DerivativeOrder::First);
+}
+```
+
+Compile the code and generate the model:
+```
+g++ -std=c++11 -I/usr/local/include/eigen3 model.cpp -ldl -o make_model
+./make_model
+```
+
+This code can then be called from Python using:
+```
+import numpy as np
+from CppADCodeGenEigenPy import CompiledModel
+
+# note that the .so file extension not included on the second argument
+model = CompiledModel("ExampleModel", "libExampleModel")
+
+inputs = np.array([1, 2, 3])
+params = np.ones(3)
+
+# compute model output and first derivative
+output = model.evaluate(inputs, params)
+jacobian = model.jacobian(inputs, params)
+
+print(f"output = {output}")
+print(f"jacobian = {jacobian}")
+```
+This C++ and Python code can be found in the [example](TODO) directory.
+
+A fully worked example that differentiates functions related to rigid body
+dynamics (which could be used for something like optimal control) can be found
+[here](https://github.com/adamheins/CppADCodeGenEigenPy-dynamics-example).
 
 ## License
 
