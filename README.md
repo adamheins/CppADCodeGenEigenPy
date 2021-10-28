@@ -2,8 +2,8 @@
 
 CppADCodeGen with an easy Eigen interface and Python bindings.
 
-This project has been tested on Ubuntu 16.04. It should work on more recent
-Ubuntu versions, and likely works on other *nix systems as well.
+This project has been tested on Ubuntu 16.04 and 18.04. It should work on more
+recent Ubuntu versions, and likely works on other Linux systems as well.
 
 ## Motivation
 
