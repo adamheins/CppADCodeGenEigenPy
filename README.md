@@ -9,9 +9,17 @@ Ubuntu versions, and likely works on other *nix systems as well.
 
 I want to be able to prototype code in Python while making use of fast,
 compiled auto-differentiated code. Autodiff tools in Python, such as
-[JAX](https://github.com/google/jax), often just-in-time compile the code rather
-than ahead-of-time compile it. I don't want to wait for JIT every time I run
-the script if nothing has changed.
+[JAX](https://github.com/google/jax), typically just-in-time (JIT) compile
+code rather than ahead-of-time compile it. I would like to avoid waiting for
+a JIT compile every time I run my script if the functions being differentiated
+haven't actually changed.
+
+The goal of CppADCodeGenEigenPy is to take the auto-diff and compilation
+capabilities of [CppADCodeGen](https://github.com/joaoleal/CppADCodeGen), wrap
+it up in an easy-to-use C++ interface, and provide built-in Python bindings to
+the compiled auto-differentiated model. The upshot is that the functions being
+differentiated need to be written in C++, but they need only be compiled once
+and they run very fast.
 
 This project was heavily inspired by larger frameworks that incorporate
 auto-diff functionality via CppADCodeGen for convenience; in particular, the
