@@ -9,10 +9,12 @@ with open("README.md") as f:
 
 
 ext_modules = [
+    # the eigen3 include directory below may be required for the compiler to
+    # find Eigen
     Pybind11Extension(
         "CppADCodeGenEigenPy",
         ["src/bindings.cpp"],
-        include_dirs=["include"],
+        include_dirs=["include", "/usr/local/include/eigen3"],
     ),
 ]
 

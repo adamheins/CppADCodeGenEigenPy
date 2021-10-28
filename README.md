@@ -46,6 +46,7 @@ First ensure you have the required dependencies:
 * a compiler with C++11 support
 * [cmake](https://cmake.org/) version 3.12+
 * [Eigen](https://eigen.tuxfamily.org/) version 3.3+
+* [Boost](https://www.boost.org/) version 1.58+ (for the tests)
 * [CppADCodeGen](https://github.com/joaoleal/CppADCodeGen)
 
 Clone CppADCodeGenEigenPy:
@@ -59,18 +60,17 @@ header-only, so you need only do:
 ```
 mkdir build
 cmake -S . -B build
-sudo cmake --install build
+cmake --install build  # may require sudo
 ```
 
-To build and install the Python bindings, `pip` is used. Note that `pip`
-version 10+ is required in order to parse `pyproject.toml`. Run
+To build and install the Python bindings, `pip` is used. Python 3 is strongly
+preferred. Note that `pip` version 10+ is required in order to parse
+`pyproject.toml`. Run
 ```
 python -m pip install .
 ```
 
 ## Tests
-
-The C++ tests require [Boost](https://www.boost.org/) (version 1.58+).
 
 To build the tests, run
 ```
