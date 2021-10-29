@@ -2,8 +2,8 @@
 
 CppADCodeGen with an easy Eigen interface and Python bindings.
 
-This project has been tested on Ubuntu 16.04 and 18.04. It should work on more
-recent Ubuntu versions, and likely works on other Linux systems as well.
+This project has been tested on Ubuntu 16.04, 18.04, and 20.04. It may work on
+other Linux systems as well.
 
 ## Motivation
 
@@ -138,6 +138,8 @@ Compile the code and generate the model:
 g++ -std=c++11 -I/usr/local/include/eigen3 model.cpp -ldl -o make_model
 ./make_model
 ```
+If you get an error about not being able to find an Eigen header, you may have
+to change the path to the Eigen include directory.
 
 This code can then be called from Python using:
 ```python
