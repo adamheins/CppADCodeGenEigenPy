@@ -26,6 +26,12 @@ auto-diff functionality via CppADCodeGen for convenience; in particular, the
 [automatic_differentiation](https://github.com/leggedrobotics/ocs2/tree/main/ocs2_core/include/ocs2_core/automatic_differentiation)
 module from [OCS2](https://github.com/leggedrobotics/ocs2) was a big influence.
 
+An alterntive approach is something like
+[PyCppAd](https://github.com/Simple-Robotics/pycppad). Instead of just binding
+the resulting auto-differentiated model like CppADCodeGenEigenPy, PyCppAd
+actually binds the underlying CppADCodeGen types to enable the auto-diff +
+code-gen pipeline to be implemented directly from Python.
+
 ## How it works
 
 This project provides a simple interface to CppADCodeGen to define the required
@@ -92,7 +98,14 @@ order to find the required dynamic libraries. If this is not the case, you can
 pass `--builddir NAME` to pytest to change it.
 
 
-## Example
+## Examples
+
+All examples are found in the [examples](examples) directory. These include the
+simple weighted sum-of-squares example described below, an example for
+differentiating the forward dynamics of a 3D rigid body, and an example of
+inverse dynamics using [Pinocchio](https://github.com/stack-of-tasks/pinocchio).
+
+### Simple weighted sum-of-squares
 
 A minimal example of the C++ code to define and generate an auto-diff model
 would look something like:
@@ -159,14 +172,8 @@ jacobian = model.jacobian(inputs, params)
 print(f"output = {output}")
 print(f"jacobian = {jacobian}")
 ```
-This C++ and Python code can be found in the
-[example](https://github.com/adamheins/CppADCodeGenEigenPy/tree/main/example)
-directory.
-
-A fully worked example that differentiates functions related to rigid body
-dynamics (which could be used for something like optimal control) can be found
-[here](https://github.com/adamheins/CppADCodeGenEigenPy-dynamics-example).
+This C++ and Python code can be found [here](examples/simple).
 
 ## License
 
-[MIT](https://github.com/adamheins/CppADCodeGenEigenPy/blob/main/LICENSE)
+[MIT](LICENSE)
