@@ -3,7 +3,7 @@
 template <typename Scalar>
 CompiledModel<Scalar> ADModel<Scalar>::compile(
     const std::string& model_name, const std::string& directory_path,
-    DerivativeOrder order, bool verbose,
+    DerivativeOrder order, bool verbose, bool save_sources,
     std::vector<std::string> compile_flags) const {
     ADVector x = input();
     ADVector p = parameters();
@@ -16,12 +16,21 @@ CompiledModel<Scalar> ADModel<Scalar>::compile(
     ADVector y = function(xp.head(x.rows()), xp.tail(p.rows()));
 
     // Record the relationship for AD
-    CppAD::ADFun<ADScalarBase> ad_func(xp, y);
+    // It is more efficient to do:
+    //   ADFun f;
+    //   f.Dependent(x, y);
+    //   f.optimize();
+    // rather than
+    //   ADFun f(x, y);
+    //   f.optimize();
+    // see <https://coin-or.github.io/CppAD/doc/optimize.htm>
+    CppAD::ADFun<ADScalarBase> ad_func;
+    ad_func.Dependent(xp, y);
 
     // Optimize the operation sequence
     ad_func.optimize();
 
-    // generates source code
+    // Generate source code
     // TODO support sparse Jacobian/Hessian
     CppAD::cg::ModelCSourceGen<Scalar> source_gen(ad_func, model_name);
     if (order >= DerivativeOrder::First) {
@@ -37,6 +46,12 @@ CompiledModel<Scalar> ADModel<Scalar>::compile(
     CppAD::cg::GccCompiler<Scalar> compiler;
     CppAD::cg::DynamicModelLibraryProcessor<Scalar> lib_processor(
         lib_source_gen, lib_generic_path);
+
+    if (save_sources) {
+        CppAD::cg::SaveFilesModelLibraryProcessor<Scalar> lib_source_saver(
+            lib_source_gen);
+        lib_source_saver.saveSources();
+    }
 
     compiler.setCompileLibFlags(compile_flags);
     compiler.addCompileLibFlag("-shared");
