@@ -4,7 +4,7 @@
 #include <boost/filesystem.hpp>
 
 #include <CppADCodeGenEigenPy/ADModel.h>
-#include <CppADCodeGenEigenPy/Model.h>
+#include <CppADCodeGenEigenPy/CompiledModel.h>
 #include <CppADCodeGenEigenPy/Util.h>
 
 #include "testing/models/ParameterizedTestModel.h"
