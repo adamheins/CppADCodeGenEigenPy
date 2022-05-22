@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Note that cmake 3.12+ is required to find Python
 # find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(Boost COMPONENTS filesystem REQUIRED)
+find_package(Eigen3 3.3 REQUIRED)
 
 # install project header files
 install(DIRECTORY include/ DESTINATION include)
@@ -29,7 +30,7 @@ add_executable(
   python_test_model_compiler
   tests/helpers/compile_models.cpp
 )
-target_include_directories(python_test_model_compiler PUBLIC include tests/include)
+target_include_directories(python_test_model_compiler PUBLIC include tests/include ${EIGEN3_INCLUDE_DIRS})
 target_link_libraries(
   python_test_model_compiler
   dl
@@ -52,7 +53,7 @@ add_executable(
   tests/cpp_tests/MathFunctionsModelTest.cpp
   tests/cpp_tests/LowOrderModelTest.cpp
 )
-target_include_directories(model_tests PUBLIC include tests/include)
+target_include_directories(model_tests PUBLIC include tests/include ${EIGEN3_INCLUDE_DIRS})
 target_link_libraries(
   model_tests
   gtest_main
