@@ -5,7 +5,7 @@ LIB_DIR=lib
 COMPILER_BIN=$(BIN_DIR)/compile_model
 COMPILER_SRC=$(SRC_DIR)/compile_model.cpp
 
-INCLUDE_DIRS=-I/usr/local/include/eigen3 -Iinclude
+INCLUDE_DIRS=-I/usr/include/eigen3 -I/usr/local/include/eigen3 -Iinclude
 CPP_FLAGS=-std=c++11
 
 # make the compiler for the model
