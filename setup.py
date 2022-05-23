@@ -7,6 +7,9 @@ from pybind11.setup_helpers import Pybind11Extension, build_ext
 with open("README.md") as f:
     long_description = f.read()
 
+with open("VERSION") as f:
+    version = f.read().strip()
+
 
 ext_modules = [
     # the eigen3 include directories below may be required for the compiler to
@@ -20,7 +23,7 @@ ext_modules = [
 
 setup(
     name="CppADCodeGenEigenPy",
-    version="0.1",
+    version=version,
     description="CppADCodeGen with an Eigen interface and Python bindings.",
     long_description=long_description,
     long_description_content_type="text/markdown",

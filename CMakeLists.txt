@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(CppADCodeGenEigenPy LANGUAGES CXX)
+file(STRINGS "VERSION" ver)
+message("Version: ${ver}")
+project(CppADCodeGenEigenPy LANGUAGES CXX VERSION ${ver})
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
